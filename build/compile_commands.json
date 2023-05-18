@@ -1,0 +1,14 @@
+[
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/include -g -o src\\CMakeFiles\\main.dir\\Mahjong.cpp.obj -c D:\\Vscode\\Leager\\src\\Mahjong.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Mahjong.cpp",
+  "output": "src\\CMakeFiles\\main.dir\\Mahjong.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/include -g -o src\\CMakeFiles\\main.dir\\Tiles.cpp.obj -c D:\\Vscode\\Leager\\src\\Tiles.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tiles.cpp",
+  "output": "src\\CMakeFiles\\main.dir\\Tiles.cpp.obj"
+}
+]

@@ -1,0 +1,13 @@
+# ninja log v5
+1	9	0	clean	6f1bdef84131402f
+2	188	7061298037948041	build.ninja	e1d905a51fc70fc6
+4	581	7061196881958227	src/CMakeFiles/main.dir/Mahjong.cc.obj	9fdc7771fcf6594b
+581	653	7061196882758231	D:/Vscode/Leager/bin/main.exe	90cab30194b67aaa
+1	173	7061298037948041	build.ninja	e1d905a51fc70fc6
+15	454	7061298042614166	src/CMakeFiles/main.dir/Tiles.cpp.obj	e0ab48241c642eff
+13	493	7061298043024165	src/CMakeFiles/main.dir/Mahjong.cpp.obj	a3363d622c34cacd
+494	569	7061298043754190	D:/Vscode/Leager/bin/main.exe	48757286d375a658
+17	4037	0	CMakeFiles/format	4d95b61aa452d031
+17	4037	0	D:/Vscode/Leager/build/CMakeFiles/format	4d95b61aa452d031
+12	2040	0	CMakeFiles/check-clang-tidy	f6543e78d44951fc
+12	2040	0	D:/Vscode/Leager/build/CMakeFiles/check-clang-tidy	f6543e78d44951fc
