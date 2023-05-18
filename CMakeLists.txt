@@ -12,4 +12,4 @@ set(PROJECT_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build) # 指定编译目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include) # 指定头文件目录
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src) # 添加子目录
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/clang-tools.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/clang-tools.cmake)
