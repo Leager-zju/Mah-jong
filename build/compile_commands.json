@@ -1,14 +1,50 @@
 [
 {
   "directory": "D:/Vscode/Leager/build",
-  "command": "clang++ -ID:/Vscode/Leager/include -g -o src\\CMakeFiles\\main.dir\\Mahjong.cpp.obj -c D:\\Vscode\\Leager\\src\\Mahjong.cpp",
-  "file": "D:\\Vscode\\Leager\\src\\Mahjong.cpp",
-  "output": "src\\CMakeFiles\\main.dir\\Mahjong.cpp.obj"
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\tile.dir\\Tile\\Expose.cpp.obj -c D:\\Vscode\\Leager\\src\\Tile\\Expose.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tile\\Expose.cpp",
+  "output": "src\\CMakeFiles\\tile.dir\\Tile\\Expose.cpp.obj"
 },
 {
   "directory": "D:/Vscode/Leager/build",
-  "command": "clang++ -ID:/Vscode/Leager/include -g -o src\\CMakeFiles\\main.dir\\Tiles.cpp.obj -c D:\\Vscode\\Leager\\src\\Tiles.cpp",
-  "file": "D:\\Vscode\\Leager\\src\\Tiles.cpp",
-  "output": "src\\CMakeFiles\\main.dir\\Tiles.cpp.obj"
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\tile.dir\\Tile\\GlobalTileManager.cpp.obj -c D:\\Vscode\\Leager\\src\\Tile\\GlobalTileManager.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tile\\GlobalTileManager.cpp",
+  "output": "src\\CMakeFiles\\tile.dir\\Tile\\GlobalTileManager.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\tile.dir\\Tile\\Hand.cpp.obj -c D:\\Vscode\\Leager\\src\\Tile\\Hand.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tile\\Hand.cpp",
+  "output": "src\\CMakeFiles\\tile.dir\\Tile\\Hand.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\tile.dir\\Tile\\PlayerTileManager.cpp.obj -c D:\\Vscode\\Leager\\src\\Tile\\PlayerTileManager.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tile\\PlayerTileManager.cpp",
+  "output": "src\\CMakeFiles\\tile.dir\\Tile\\PlayerTileManager.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\tile.dir\\Tile\\Tiles.cpp.obj -c D:\\Vscode\\Leager\\src\\Tile\\Tiles.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Tile\\Tiles.cpp",
+  "output": "src\\CMakeFiles\\tile.dir\\Tile\\Tiles.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\win.dir\\Win\\WinningDetector.cpp.obj -c D:\\Vscode\\Leager\\src\\Win\\WinningDetector.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Win\\WinningDetector.cpp",
+  "output": "src\\CMakeFiles\\win.dir\\Win\\WinningDetector.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\mahjong.dir\\Mahjong.cpp.obj -c D:\\Vscode\\Leager\\src\\Mahjong.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\Mahjong.cpp",
+  "output": "src\\CMakeFiles\\mahjong.dir\\Mahjong.cpp.obj"
+},
+{
+  "directory": "D:/Vscode/Leager/build",
+  "command": "clang++ -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win -g -o src\\CMakeFiles\\mahjong.dir\\MajManager.cpp.obj -c D:\\Vscode\\Leager\\src\\MajManager.cpp",
+  "file": "D:\\Vscode\\Leager\\src\\MajManager.cpp",
+  "output": "src\\CMakeFiles\\mahjong.dir\\MajManager.cpp.obj"
 }
 ]

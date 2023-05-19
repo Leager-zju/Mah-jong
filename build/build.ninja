@@ -93,14 +93,14 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # Custom command for CMakeFiles\format
 
 build CMakeFiles/format | ${cmake_ninja_workdir}CMakeFiles/format: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D D:\Vscode\Leager\build && D:\MSYS2\MSYS2\clang64\bin\clang-format -style=file -i D:/Vscode/Leager/build/CMakeFiles/3.26.3/CompilerIdCXX/CMakeCXXCompilerId.cpp D:/Vscode/Leager/include/TileTypes.hpp D:/Vscode/Leager/include/Tiles.hpp D:/Vscode/Leager/src/Mahjong.cpp D:/Vscode/Leager/src/Tiles.cpp"
+  COMMAND = cmd.exe /C "cd /D D:\Vscode\Leager\build && D:\MSYS2\MSYS2\clang64\bin\clang-format -style=file -i D:/Vscode/Leager/build/CMakeFiles/3.26.3/CompilerIdCXX/CMakeCXXCompilerId.cpp D:/Vscode/Leager/include/Common/Common.hpp D:/Vscode/Leager/include/MajManager.hpp D:/Vscode/Leager/include/Tile/Expose.hpp D:/Vscode/Leager/include/Tile/GlobalTileManager.hpp D:/Vscode/Leager/include/Tile/Hand.hpp D:/Vscode/Leager/include/Tile/PlayerTileManager.hpp D:/Vscode/Leager/include/Tile/TileTypes.hpp D:/Vscode/Leager/include/Tile/Tiles.hpp D:/Vscode/Leager/include/Win/Meld.hpp D:/Vscode/Leager/include/Win/WinningDetector.hpp D:/Vscode/Leager/src/Mahjong.cpp D:/Vscode/Leager/src/MajManager.cpp D:/Vscode/Leager/src/Tile/Expose.cpp D:/Vscode/Leager/src/Tile/GlobalTileManager.cpp D:/Vscode/Leager/src/Tile/Hand.cpp D:/Vscode/Leager/src/Tile/PlayerTileManager.cpp D:/Vscode/Leager/src/Tile/Tiles.cpp D:/Vscode/Leager/src/Win/WinningDetector.cpp"
 
 
 #############################################
 # Custom command for CMakeFiles\check-clang-tidy
 
 build CMakeFiles/check-clang-tidy | ${cmake_ninja_workdir}CMakeFiles/check-clang-tidy: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D D:\Vscode\Leager\build && D:\MSYS2\MSYS2\clang64\bin\clang-tidy --config-file=D:/Vscode/Leager/.clang-tidy -p D:/Vscode/Leager/build D:/Vscode/Leager/build/CMakeFiles/3.26.3/CompilerIdCXX/CMakeCXXCompilerId.cpp D:/Vscode/Leager/include/TileTypes.hpp D:/Vscode/Leager/include/Tiles.hpp D:/Vscode/Leager/src/Mahjong.cpp D:/Vscode/Leager/src/Tiles.cpp"
+  COMMAND = cmd.exe /C "cd /D D:\Vscode\Leager\build && D:\MSYS2\MSYS2\clang64\bin\clang-tidy --config-file=D:/Vscode/Leager/.clang-tidy -p D:/Vscode/Leager/build D:/Vscode/Leager/build/CMakeFiles/3.26.3/CompilerIdCXX/CMakeCXXCompilerId.cpp D:/Vscode/Leager/include/Common/Common.hpp D:/Vscode/Leager/include/MajManager.hpp D:/Vscode/Leager/include/Tile/Expose.hpp D:/Vscode/Leager/include/Tile/GlobalTileManager.hpp D:/Vscode/Leager/include/Tile/Hand.hpp D:/Vscode/Leager/include/Tile/PlayerTileManager.hpp D:/Vscode/Leager/include/Tile/TileTypes.hpp D:/Vscode/Leager/include/Tile/Tiles.hpp D:/Vscode/Leager/include/Win/Meld.hpp D:/Vscode/Leager/include/Win/WinningDetector.hpp D:/Vscode/Leager/src/Mahjong.cpp D:/Vscode/Leager/src/MajManager.cpp D:/Vscode/Leager/src/Tile/Expose.cpp D:/Vscode/Leager/src/Tile/GlobalTileManager.cpp D:/Vscode/Leager/src/Tile/Hand.cpp D:/Vscode/Leager/src/Tile/PlayerTileManager.cpp D:/Vscode/Leager/src/Tile/Tiles.cpp D:/Vscode/Leager/src/Win/WinningDetector.cpp"
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
@@ -108,45 +108,137 @@ build CMakeFiles/check-clang-tidy | ${cmake_ninja_workdir}CMakeFiles/check-clang
 # =============================================================================
 
 # =============================================================================
-# Object build statements for EXECUTABLE target main
+# Object build statements for STATIC_LIBRARY target tile
 
 
 #############################################
-# Order-only phony target for main
+# Order-only phony target for tile
 
-build cmake_object_order_depends_target_main: phony || src/CMakeFiles/main.dir
+build cmake_object_order_depends_target_tile: phony || src/CMakeFiles/tile.dir
 
-build src/CMakeFiles/main.dir/Mahjong.cpp.obj: CXX_COMPILER__main_unscanned_Debug D$:/Vscode/Leager/src/Mahjong.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = src\CMakeFiles\main.dir\Mahjong.cpp.obj.d
+build src/CMakeFiles/tile.dir/Tile/Expose.cpp.obj: CXX_COMPILER__tile_unscanned_Debug D$:/Vscode/Leager/src/Tile/Expose.cpp || cmake_object_order_depends_target_tile
+  DEP_FILE = src\CMakeFiles\tile.dir\Tile\Expose.cpp.obj.d
   FLAGS = -g
-  INCLUDES = -ID:/Vscode/Leager/include
-  OBJECT_DIR = src\CMakeFiles\main.dir
-  OBJECT_FILE_DIR = src\CMakeFiles\main.dir
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\tile.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\tile.dir\Tile
 
-build src/CMakeFiles/main.dir/Tiles.cpp.obj: CXX_COMPILER__main_unscanned_Debug D$:/Vscode/Leager/src/Tiles.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = src\CMakeFiles\main.dir\Tiles.cpp.obj.d
+build src/CMakeFiles/tile.dir/Tile/GlobalTileManager.cpp.obj: CXX_COMPILER__tile_unscanned_Debug D$:/Vscode/Leager/src/Tile/GlobalTileManager.cpp || cmake_object_order_depends_target_tile
+  DEP_FILE = src\CMakeFiles\tile.dir\Tile\GlobalTileManager.cpp.obj.d
   FLAGS = -g
-  INCLUDES = -ID:/Vscode/Leager/include
-  OBJECT_DIR = src\CMakeFiles\main.dir
-  OBJECT_FILE_DIR = src\CMakeFiles\main.dir
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\tile.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\tile.dir\Tile
+
+build src/CMakeFiles/tile.dir/Tile/Hand.cpp.obj: CXX_COMPILER__tile_unscanned_Debug D$:/Vscode/Leager/src/Tile/Hand.cpp || cmake_object_order_depends_target_tile
+  DEP_FILE = src\CMakeFiles\tile.dir\Tile\Hand.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\tile.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\tile.dir\Tile
+
+build src/CMakeFiles/tile.dir/Tile/PlayerTileManager.cpp.obj: CXX_COMPILER__tile_unscanned_Debug D$:/Vscode/Leager/src/Tile/PlayerTileManager.cpp || cmake_object_order_depends_target_tile
+  DEP_FILE = src\CMakeFiles\tile.dir\Tile\PlayerTileManager.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\tile.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\tile.dir\Tile
+
+build src/CMakeFiles/tile.dir/Tile/Tiles.cpp.obj: CXX_COMPILER__tile_unscanned_Debug D$:/Vscode/Leager/src/Tile/Tiles.cpp || cmake_object_order_depends_target_tile
+  DEP_FILE = src\CMakeFiles\tile.dir\Tile\Tiles.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\tile.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\tile.dir\Tile
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target main
+# Link build statements for STATIC_LIBRARY target tile
 
 
 #############################################
-# Link the executable D:\Vscode\Leager\bin\main.exe
+# Link the static library src\libtile.a
 
-build D$:/Vscode/Leager/bin/main.exe: CXX_EXECUTABLE_LINKER__main_Debug src/CMakeFiles/main.dir/Mahjong.cpp.obj src/CMakeFiles/main.dir/Tiles.cpp.obj
-  FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  OBJECT_DIR = src\CMakeFiles\main.dir
+build src/libtile.a: CXX_STATIC_LIBRARY_LINKER__tile_Debug src/CMakeFiles/tile.dir/Tile/Expose.cpp.obj src/CMakeFiles/tile.dir/Tile/GlobalTileManager.cpp.obj src/CMakeFiles/tile.dir/Tile/Hand.cpp.obj src/CMakeFiles/tile.dir/Tile/PlayerTileManager.cpp.obj src/CMakeFiles/tile.dir/Tile/Tiles.cpp.obj
+  LANGUAGE_COMPILE_FLAGS = -g
+  OBJECT_DIR = src\CMakeFiles\tile.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_FILE = D:\Vscode\Leager\bin\main.exe
-  TARGET_IMPLIB = D:\Vscode\Leager\bin\libmain.dll.a
-  TARGET_PDB = main.exe.dbg
+  TARGET_FILE = src\libtile.a
+  TARGET_PDB = tile.a.dbg
+
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target win
+
+
+#############################################
+# Order-only phony target for win
+
+build cmake_object_order_depends_target_win: phony || src/CMakeFiles/win.dir
+
+build src/CMakeFiles/win.dir/Win/WinningDetector.cpp.obj: CXX_COMPILER__win_unscanned_Debug D$:/Vscode/Leager/src/Win/WinningDetector.cpp || cmake_object_order_depends_target_win
+  DEP_FILE = src\CMakeFiles\win.dir\Win\WinningDetector.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\win.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\win.dir\Win
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target win
+
+
+#############################################
+# Link the static library src\libwin.a
+
+build src/libwin.a: CXX_STATIC_LIBRARY_LINKER__win_Debug src/CMakeFiles/win.dir/Win/WinningDetector.cpp.obj
+  LANGUAGE_COMPILE_FLAGS = -g
+  OBJECT_DIR = src\CMakeFiles\win.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = src\libwin.a
+  TARGET_PDB = win.a.dbg
+
+# =============================================================================
+# Object build statements for EXECUTABLE target mahjong
+
+
+#############################################
+# Order-only phony target for mahjong
+
+build cmake_object_order_depends_target_mahjong: phony || cmake_object_order_depends_target_tile cmake_object_order_depends_target_win
+
+build src/CMakeFiles/mahjong.dir/Mahjong.cpp.obj: CXX_COMPILER__mahjong_unscanned_Debug D$:/Vscode/Leager/src/Mahjong.cpp || cmake_object_order_depends_target_mahjong
+  DEP_FILE = src\CMakeFiles\mahjong.dir\Mahjong.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\mahjong.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\mahjong.dir
+
+build src/CMakeFiles/mahjong.dir/MajManager.cpp.obj: CXX_COMPILER__mahjong_unscanned_Debug D$:/Vscode/Leager/src/MajManager.cpp || cmake_object_order_depends_target_mahjong
+  DEP_FILE = src\CMakeFiles\mahjong.dir\MajManager.cpp.obj.d
+  FLAGS = -g
+  INCLUDES = -ID:/Vscode/Leager/./include -ID:/Vscode/Leager/./include/Common -ID:/Vscode/Leager/./include/Tile -ID:/Vscode/Leager/./include/Win
+  OBJECT_DIR = src\CMakeFiles\mahjong.dir
+  OBJECT_FILE_DIR = src\CMakeFiles\mahjong.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target mahjong
+
+
+#############################################
+# Link the executable D:\Vscode\Leager\bin\mahjong.exe
+
+build D$:/Vscode/Leager/bin/mahjong.exe: CXX_EXECUTABLE_LINKER__mahjong_Debug src/CMakeFiles/mahjong.dir/Mahjong.cpp.obj src/CMakeFiles/mahjong.dir/MajManager.cpp.obj | src/libtile.a src/libwin.a || src/libtile.a src/libwin.a
+  FLAGS = -g
+  LINK_LIBRARIES = src/libtile.a  src/libwin.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = src\CMakeFiles\mahjong.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = D:\Vscode\Leager\bin\mahjong.exe
+  TARGET_IMPLIB = D:\Vscode\Leager\bin\libmahjong.dll.a
+  TARGET_PDB = mahjong.exe.dbg
 
 
 #############################################
@@ -187,9 +279,17 @@ build src/rebuild_cache: phony src/CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build main: phony D$:/Vscode/Leager/bin/main.exe
+build libtile.a: phony src/libtile.a
 
-build main.exe: phony D$:/Vscode/Leager/bin/main.exe
+build libwin.a: phony src/libwin.a
+
+build mahjong: phony D$:/Vscode/Leager/bin/mahjong.exe
+
+build mahjong.exe: phony D$:/Vscode/Leager/bin/mahjong.exe
+
+build tile: phony src/libtile.a
+
+build win: phony src/libwin.a
 
 # =============================================================================
 # Folder targets.
@@ -206,7 +306,7 @@ build all: phony src/all
 #############################################
 # Folder: D:/Vscode/Leager/build/src
 
-build src/all: phony D$:/Vscode/Leager/bin/main.exe
+build src/all: phony src/libtile.a src/libwin.a D$:/Vscode/Leager/bin/mahjong.exe
 
 # =============================================================================
 # Built-in targets
@@ -215,14 +315,14 @@ build src/all: phony D$:/Vscode/Leager/bin/main.exe
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | CMakeCache.txt CMakeFiles/3.26.3/CMakeCCompiler.cmake CMakeFiles/3.26.3/CMakeCXXCompiler.cmake CMakeFiles/3.26.3/CMakeRCCompiler.cmake CMakeFiles/3.26.3/CMakeSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCXXInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCommonLanguageInclude.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeGenericSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeInitializeConfigs.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeLanguageInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeRCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-C-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-CXX-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-windres.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/WindowsPaths.cmake D$:/Vscode/Leager/CMakeLists.txt D$:/Vscode/Leager/cmake/modules/clang-tools.cmake D$:/Vscode/Leager/src/CMakeLists.txt
+build build.ninja: RERUN_CMAKE | CMakeCache.txt CMakeFiles/3.26.3/CMakeCCompiler.cmake CMakeFiles/3.26.3/CMakeCXXCompiler.cmake CMakeFiles/3.26.3/CMakeRCCompiler.cmake CMakeFiles/3.26.3/CMakeSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCXXInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCommonLanguageInclude.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeGenericSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeInitializeConfigs.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeLanguageInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeRCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-C-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-CXX-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-windres.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/WindowsPaths.cmake D$:/Vscode/Leager/CMakeLists.txt D$:/Vscode/Leager/cmake/clang-tools.cmake D$:/Vscode/Leager/src/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build CMakeCache.txt CMakeFiles/3.26.3/CMakeCCompiler.cmake CMakeFiles/3.26.3/CMakeCXXCompiler.cmake CMakeFiles/3.26.3/CMakeRCCompiler.cmake CMakeFiles/3.26.3/CMakeSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCXXInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCommonLanguageInclude.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeGenericSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeInitializeConfigs.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeLanguageInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeRCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-C-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-CXX-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-windres.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/WindowsPaths.cmake D$:/Vscode/Leager/CMakeLists.txt D$:/Vscode/Leager/cmake/modules/clang-tools.cmake D$:/Vscode/Leager/src/CMakeLists.txt: phony
+build CMakeCache.txt CMakeFiles/3.26.3/CMakeCCompiler.cmake CMakeFiles/3.26.3/CMakeCXXCompiler.cmake CMakeFiles/3.26.3/CMakeRCCompiler.cmake CMakeFiles/3.26.3/CMakeSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCXXInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeCommonLanguageInclude.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeGenericSystem.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeInitializeConfigs.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeLanguageInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeRCInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInformation.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Compiler/GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-C.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang-CXX.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-Clang.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-C-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU-CXX-ABI.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-GNU.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows-windres.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/Windows.cmake D$:/MSYS2/MSYS2/clang64/share/cmake/Modules/Platform/WindowsPaths.cmake D$:/Vscode/Leager/CMakeLists.txt D$:/Vscode/Leager/cmake/clang-tools.cmake D$:/Vscode/Leager/src/CMakeLists.txt: phony
 
 
 #############################################

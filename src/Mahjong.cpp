@@ -1,5 +1,9 @@
-#include "Tiles.hpp"
+#include <memory>
 
-#include <iostream>
+#include "MajManager.hpp"
 
-int main() { return 0; }
+int main() {
+  std::unique_ptr<MajManager> manager = std::make_unique<MajManager>();
+  manager->begin();
+  return 0;
+}
