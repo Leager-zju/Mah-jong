@@ -1,16 +1,18 @@
 #include "PlayerTileManager.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <optional>
 
 #include "Tiles.hpp"
+#include "WinningDetector.hpp"
 
 void PlayerTileManager::draw(pTile new_tile) {
   new_tile->set_owner(player_index_);
   if (is_my_player_) {
     std::cout << "\nYou Draw Tile: " << new_tile->to_string() << '\n';
   }
-  hand_->draw(std::move(new_tile));
+  hand_->draw(new_tile);
   // while (is_my_player_) {
   //   int start_index = -1;
   //   hand_->check_concealed_kong(start_index);
@@ -37,6 +39,19 @@ pTile PlayerTileManager::discard() {
   }
   return discard_tile;
 }
+
+DetectResult PlayerTileManager::try_self_drawn(pTile new_tile) {
+  DetectResult res = WinningDetector::detect(*hand_, *expose_, new_tile);
+  if (res.has_result()) {
+    char option;
+    std::cout << "\nYou Can Self-Drawn, Do you? [y/n]";
+    std::cin >> option;
+    assert(option == 'y' || option == 'n');
+    return option == 'y' ? res : DetectResult{};
+  }
+  return res;
+}
+
 
 void PlayerTileManager::show_hand() {
   std::cout << "Your ";

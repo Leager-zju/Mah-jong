@@ -1,81 +1,65 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <vector>
+
+#include "TileTypes.hpp"
+#include "Tiles.hpp"
 
 enum class MeldType : uint16_t {
   Eyes,           // 雀头
   Triplet,        // 刻子
+  Sequence,       // 顺子
   ExposeKong,     // 明杠
   ConcealedKong,  // 暗杠
-  Sequence,       // 顺子
 };
+struct Meld {
+  // Eyes
+  explicit Meld(MeldType meld_type, pTile tile_1, pTile tile_2) : meld_type_(meld_type) {
+    meld_.push_back(tile_1);
+    meld_.push_back(tile_2);
+  }
+  // Triplet/Sequence
+  explicit Meld(MeldType meld_type, pTile tile_1, pTile tile_2, pTile tile_3) : Meld(meld_type, tile_1, tile_2) {
+    meld_.push_back(tile_3);
+  }
+  // ExposeKong/ConcealedKong
+  explicit Meld(MeldType meld_type, pTile tile_1, pTile tile_2, pTile tile_3, pTile tile_4)
+      : Meld(meld_type, tile_1, tile_2, tile_3) {
+    meld_.push_back(tile_4);
+  }
 
-class Meld {
- public:
+  void show() const;
   MeldType meld_type_;
-  virtual void show() = 0;
+  std::vector<pTile> meld_;
 };
 
-class Eyes : public Meld {
- public:
-  explicit Eyes(uint16_t id) {
-    Meld::meld_type_ = MeldType::Eyes;
-    tile_id_ = id;
+// used in winning detector
+struct MeldInId {
+  explicit MeldInId(const Meld& meld) {
+    for (pTile p : meld.meld_) {
+      tile_ids_.push_back(p->to_id());
+    }
   }
-  virtual void show();
-
- private:
-  uint16_t tile_id_;
-};
-
-class Triplet : public Meld {
- public:
-  explicit Triplet(uint16_t id) {
-    Meld::meld_type_ = MeldType::Eyes;
-    tile_id_ = id;
+  // Eyes
+  explicit MeldInId(MeldType meld_type, tile_id tile_id1, tile_id tile_id2) : meld_type_(meld_type) {
+    tile_ids_.push_back(tile_id1);
+    tile_ids_.push_back(tile_id2);
   }
-  virtual void show();
-
- private:
-  uint16_t tile_id_;
-};
-
-class Sequence : public Meld {
- public:
-  explicit Sequence(uint16_t id1, uint16_t id2, uint16_t id3) {
-    assert(id2 == id1 + 1 && id3 == id2 + 1);
-    Meld::meld_type_ = MeldType::Eyes;
-    tile_id_[0] = id1;
-    tile_id_[1] = id2;
-    tile_id_[2] = id3;
+  // Triplet/Sequence
+  explicit MeldInId(MeldType meld_type, tile_id tile_id1, tile_id tile_id2, tile_id tile_id3)
+      : MeldInId(meld_type, tile_id1, tile_id2) {
+    tile_ids_.push_back(tile_id3);
   }
-  virtual void show();
-
- private:
-  uint16_t tile_id_[3];
-};
-
-class ExposeKong : public Meld {
- public:
-  explicit ExposeKong(uint16_t id) {
-    Meld::meld_type_ = MeldType::ExposeKong;
-    tile_id_ = id;
+  // ExposeKong/ConcealedKong
+  explicit MeldInId(MeldType meld_type, tile_id tile_id1, tile_id tile_id2, tile_id tile_id3, tile_id tile_id4)
+      : MeldInId(meld_type, tile_id1, tile_id2, tile_id3) {
+    tile_ids_.push_back(tile_id4);
   }
-  virtual void show();
 
- private:
-  uint16_t tile_id_;
-};
-
-class ConcealedKong : public Meld {
- public:
-  explicit ConcealedKong(uint16_t id) {
-    Meld::meld_type_ = MeldType::ConcealedKong;
-    tile_id_ = id;
-  }
-  virtual void show();
-
- private:
-  uint16_t tile_id_;
+  void show() const;
+  MeldType meld_type_;
+  std::vector<tile_id> tile_ids_;
 };

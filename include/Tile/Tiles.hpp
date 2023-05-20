@@ -6,46 +6,24 @@
 
 #include "TileTypes.hpp"
 
-using pTile = std::unique_ptr<class Tile>;
-using tile_id_t = uint16_t;
+using pTile = class Tile*;
 
 class Tile {
  public:
-  virtual ~Tile() = default;
+  explicit Tile(tile_id id) : id_(id) {}
+  explicit Tile(const std::string& str) : id_(transform_string2id(str)) {}
+  static tile_id transform_string2id(const std::string& str);
+  static std::string transform_id2string(tile_id id);
 
-  static pTile from_string(const std::string& str);
-  static pTile from_id(tile_id_t id);
-  static tile_id_t transform_string2id(const std::string& str);
-  static std::string transform_id2string(tile_id_t id);
+  void initial();
   std::string get_ANSI();
-  virtual std::string to_string() = 0;
-  virtual tile_id_t to_id() = 0;
-
-  TileCategory get_category() { return category_; }
-  void set_owner(uint16_t index) { owner_index_ = index; }
+  std::string to_string() { return get_ANSI() + transform_id2string(id_) + "\033[0m"; }
+  tile_id to_id() { return id_; }
+  void become_dora() { is_dora = true; }
+  void set_owner(uint8_t index) { owner_index_ = index; }
 
  protected:
-  TileCategory category_;
-  uint16_t owner_index_ = -1;  // -1 表示无主牌, 0~3 for 东南西北
-};
-
-class SuitTile : public Tile {
- public:
-  explicit SuitTile(SuitType type, uint16_t rank);
-  virtual std::string to_string() noexcept;
-  virtual tile_id_t to_id() noexcept;
-
- private:
-  uint16_t rank_;  // 点数
-  SuitType type_;
-};
-
-class HonorTile : public Tile {
- public:
-  explicit HonorTile(HonorType type);
-  virtual std::string to_string() noexcept;
-  virtual tile_id_t to_id() noexcept;
-
- private:
-  HonorType type_;
+  bool is_dora = false;
+  uint8_t owner_index_ = -1;  // -1 for 无主牌, 0~3 for 东南西北
+  tile_id id_ = NAT;
 };

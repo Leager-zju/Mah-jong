@@ -15,6 +15,7 @@ class GlobalTileManager {
   void receive_discard_tile(pTile discard_tile);
   void show_deck();
   void show_discard_pile();
+  void show_dora_indicator();
 
   inline bool is_empty() { return head_ == TILE_UPPER_BOUND; }
 

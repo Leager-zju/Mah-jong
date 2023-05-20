@@ -1,9 +1,37 @@
+include_directories(${CMAKE_SOURCE_DIR}/third_party/googletest/googletest/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/googletest/googlemock/include)
+
 include(GoogleTest)
 
-aux_source_directory(. TEST_LIB_SRCS) # 添加所有 .cpp 文件
+file(GLOB_RECURSE TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*/*test.cpp")
 
-add_executable(MyTests ${TEST_LIB_SRCS}) # 指定生成目标
+# #########################################
+# "make XYZ_test"
+# #########################################
+foreach (test_file ${TEST_FILES})
+    # replace "XYZ-test.cpp" with "XYZ-test"
+    get_filename_component(test_filename ${test_file} NAME)
+    string(REPLACE ".cpp" "" test_name ${test_filename})
 
-target_link_libraries(MyTests ${GTEST_BOTH_LIBRARIES})
+    # Add the test target separately and as part of "make XYZ-test".
+    add_executable(${test_name} ${test_file})
+    target_link_libraries(${test_name} gtest gmock_main library)
 
-add_test(Test MyTests)
+    message(STATUS "ADD TEST: " ${test_name})
+
+    gtest_discover_tests(${test_name}
+            EXTRA_ARGS
+            --gtest_color=auto
+            --gtest_output=xml:${CMAKE_BINARY_DIR}/test/${test_name}.xml
+            --gtest_catch_exceptions=0
+            DISCOVERY_TIMEOUT 120
+            PROPERTIES
+            TIMEOUT 120
+            )
+
+    set_target_properties(${test_name}
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${EXECUTABLE_OUTPUT_PATH}"
+            COMMAND ${test_name}
+            )
+endforeach ()

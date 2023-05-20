@@ -1,7 +1,9 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 
+#include "Meld.hpp"
 #include "Tiles.hpp"
 
 /**
@@ -9,12 +11,20 @@
  */
 class Expose {
  public:
-  void add_triplet(std::vector<pTile>&& triplet);
-  void add_expose_kong(std::vector<pTile>&& expose_kong);
-  void add_concealed_kong(std::vector<pTile>&& concealed_kong);
-  void add_sequence(std::vector<pTile>&& sequence);
-  void show();
+  Expose() = default;
+  explicit Expose(std::vector<Meld>& in_expose) : in_expose_(in_expose) {}
+  void add_new_meld(const Meld& meld) { in_expose_.emplace_back(meld); }
+  void show() const {
+    std::cout << "Expose:";
+    for (auto&& meld : in_expose_) {
+      meld.show();
+    }
+    if (in_expose_.empty()) {
+      std::cout << '\n';
+    }
+  }
+  const std::vector<Meld>& get_exposes() const { return in_expose_; }
 
  private:
-  std::vector<std::vector<pTile>> in_expose_;
+  std::vector<Meld> in_expose_;
 };

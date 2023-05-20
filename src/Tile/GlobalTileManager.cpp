@@ -1,4 +1,5 @@
 #include "GlobalTileManager.hpp"
+
 #include <corecrt.h>
 
 #include <algorithm>
@@ -10,24 +11,38 @@
 
 #include "Tiles.hpp"
 
-GlobalTileManager::GlobalTileManager() { deck_.reserve(TOTAL); disacrd_pile_.reserve(TOTAL); }
+static Tile tile_pool[136] = {
+    Tile(_1m), Tile(_1m), Tile(_1m), Tile(_1m), Tile(_2m), Tile(_2m), Tile(_2m), Tile(_2m), Tile(_3m), Tile(_3m),
+    Tile(_3m), Tile(_3m), Tile(_4m), Tile(_4m), Tile(_4m), Tile(_4m), Tile(_5m), Tile(_5m), Tile(_5m), Tile(_5m),
+    Tile(_6m), Tile(_6m), Tile(_6m), Tile(_6m), Tile(_7m), Tile(_7m), Tile(_7m), Tile(_7m), Tile(_8m), Tile(_8m),
+    Tile(_8m), Tile(_8m), Tile(_9m), Tile(_9m), Tile(_9m), Tile(_9m),
+
+    Tile(_1p), Tile(_1p), Tile(_1p), Tile(_1p), Tile(_2p), Tile(_2p), Tile(_2p), Tile(_2p), Tile(_3p), Tile(_3p),
+    Tile(_3p), Tile(_3p), Tile(_4p), Tile(_4p), Tile(_4p), Tile(_4p), Tile(_5p), Tile(_5p), Tile(_5p), Tile(_5p),
+    Tile(_6p), Tile(_6p), Tile(_6p), Tile(_6p), Tile(_7p), Tile(_7p), Tile(_7p), Tile(_7p), Tile(_8p), Tile(_8p),
+    Tile(_8p), Tile(_8p), Tile(_9p), Tile(_9p), Tile(_9p), Tile(_9p),
+
+    Tile(_1s), Tile(_1s), Tile(_1s), Tile(_1s), Tile(_2s), Tile(_2s), Tile(_2s), Tile(_2s), Tile(_3s), Tile(_3s),
+    Tile(_3s), Tile(_3s), Tile(_4s), Tile(_4s), Tile(_4s), Tile(_4s), Tile(_5s), Tile(_5s), Tile(_5s), Tile(_5s),
+    Tile(_6s), Tile(_6s), Tile(_6s), Tile(_6s), Tile(_7s), Tile(_7s), Tile(_7s), Tile(_7s), Tile(_8s), Tile(_8s),
+    Tile(_8s), Tile(_8s), Tile(_9s), Tile(_9s), Tile(_9s), Tile(_9s),
+
+    Tile(_E),  Tile(_E),  Tile(_E),  Tile(_E),  Tile(_S),  Tile(_S),  Tile(_S),  Tile(_S),  Tile(_W),  Tile(_W),
+    Tile(_W),  Tile(_W),  Tile(_N),  Tile(_N),  Tile(_N),  Tile(_N),  Tile(_Z),  Tile(_Z),  Tile(_Z),  Tile(_Z),
+    Tile(_F),  Tile(_F),  Tile(_F),  Tile(_F),  Tile(_B),  Tile(_B),  Tile(_B),  Tile(_B)};
+
+GlobalTileManager::GlobalTileManager() {
+  deck_.resize(TOTAL);
+  disacrd_pile_.resize(TOTAL);
+}
 
 void GlobalTileManager::initial() {
   // 清理所有 pTile
-  deck_.clear();
   disacrd_pile_.clear();
 
-  for (uint16_t category = 0; category <= 2; category++) {
-    for (uint16_t rank = 1; rank <= 9; rank++) {
-      for (auto i = 0; i < 4; i++) {
-        deck_.emplace_back(Tile::from_id(category * 10 + rank));
-      }
-    }
-  }
-  for (uint16_t category = 3; category <= 9; category++) {
-    for (auto i = 0; i < 4; i++) {
-      deck_.emplace_back(Tile::from_id(category * 10));
-    }
+  for (size_t i = 0; i < TOTAL; i++) {
+    tile_pool[i].initial();
+    deck_[i] = tile_pool + i;
   }
   shuffle();
 }
@@ -37,12 +52,10 @@ pTile GlobalTileManager::pop() {
     return nullptr;
   }
 
-  return std::move(deck_[head_++]);
+  return deck_[head_++];
 }
 
-void GlobalTileManager::receive_discard_tile(pTile discard_tile) {
-  disacrd_pile_.emplace_back(std::move(discard_tile));
-}
+void GlobalTileManager::receive_discard_tile(pTile discard_tile) { disacrd_pile_.emplace_back(discard_tile); }
 
 void GlobalTileManager::shuffle() {
   std::random_device rd;
@@ -51,17 +64,29 @@ void GlobalTileManager::shuffle() {
 }
 
 void GlobalTileManager::show_deck() {
-  std::cout << "Deck:\n";
-  for (auto i = head_; i < tail_; i++) {
+  std::cout << "Deck: ";
+  for (uint16_t i = head_; i < tail_; i++) {
     std::cout << deck_[i]->to_string() << " ";
   }
   std::cout << '\n';
 }
 
 void GlobalTileManager::show_discard_pile() {
-  std::cout << "Discard Pile:\n";
+  std::cout << "Discard Pile: ";
   for (size_t i = 0; i < disacrd_pile_.size(); i++) {
     std::cout << disacrd_pile_[i]->to_string() << " ";
+  }
+  std::cout << '\n';
+}
+
+void GlobalTileManager::show_dora_indicator() {
+  std::cout << "Dora Indicator: ";
+  for (uint16_t i = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND; i -= 2) {
+    if (i >= dora_) {
+      std::cout << deck_[i]->to_string() << " ";
+    } else {
+      // std::cout << "\033[31m \033[0m ";
+    }
   }
   std::cout << '\n';
 }

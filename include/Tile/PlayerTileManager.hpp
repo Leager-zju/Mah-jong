@@ -8,6 +8,7 @@
 #include "Hand.hpp"
 #include "Meld.hpp"
 #include "Tiles.hpp"
+#include "WinningDetector.hpp"
 
 class PlayerTileManager {
  public:
@@ -15,10 +16,10 @@ class PlayerTileManager {
       : hand_(std::make_unique<Hand>()),
         expose_(std::make_unique<Expose>()),
         player_index_(player_index),
-        is_my_player_(is_my_player) {
-    std::cout << "Player" << player_index << " Constructed!\n";
-  }
+        is_my_player_(is_my_player) {}
   void draw(pTile new_tile);
+  DetectResult try_self_drawn(pTile new_tile);
+
   pTile discard();
   void show_hand();
   void show_expose();

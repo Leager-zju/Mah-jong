@@ -5,6 +5,7 @@
 
 #include "GlobalTileManager.hpp"
 #include "PlayerTileManager.hpp"
+#include "WinningDetector.hpp"
 
 class MajManager {
  public:
@@ -12,7 +13,9 @@ class MajManager {
   void initial();
   void begin();
   void begin_new_round();
-  void clear_and_print();
+  void Win(uint16_t winner_index, bool self_drawn_win, DetectResult detect_result);
+  void clear_and_print_header();
+  void print_settle_interface();
 
  private:
   std::unique_ptr<GlobalTileManager> global_tile_manager_;
