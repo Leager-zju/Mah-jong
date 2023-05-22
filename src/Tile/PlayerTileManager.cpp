@@ -4,9 +4,11 @@
 #include <iostream>
 #include <optional>
 
+#include "DoraYaku.hpp"
 #include "Tiles.hpp"
-#include "WinningDetector.hpp"
+#include "YakuMatcher.hpp"
 
+namespace MAHJONG {
 void PlayerTileManager::draw(pTile new_tile) {
   new_tile->set_owner(player_index_);
   if (is_my_player_) {
@@ -40,18 +42,24 @@ pTile PlayerTileManager::discard() {
   return discard_tile;
 }
 
-DetectResult PlayerTileManager::try_self_drawn(pTile new_tile) {
-  DetectResult res = WinningDetector::detect(*hand_, *expose_, new_tile);
-  if (res.has_result()) {
+MatchResult PlayerTileManager::try_self_drawn(pTile new_tile) {
+  if (MatchResult res =
+          YakuMatcher::detect(*hand_, *expose_, new_tile, in_Riichi_, true);
+      res.has_result()) {
     char option;
     std::cout << "\nYou Can Self-Drawn, Do you? [y/n]";
     std::cin >> option;
-    assert(option == 'y' || option == 'n');
-    return option == 'y' ? res : DetectResult{};
+    while (option != 'y' && option != 'n') {
+      std::cout << "\nWrong Input, Please Try Again! [y/n]";
+      std::cin >> option;
+    }
+    if (option == 'y') {
+      Dora::try_match(*hand_, *expose_, in_Riichi_, res);
+      return res;
+    }
   }
-  return res;
+  return {};
 }
-
 
 void PlayerTileManager::show_hand() {
   std::cout << "Your ";
@@ -62,3 +70,4 @@ void PlayerTileManager::show_expose() {
   std::cout << "Player" << player_index_ << " ";
   expose_->show();
 }
+};  // namespace MAHJONG

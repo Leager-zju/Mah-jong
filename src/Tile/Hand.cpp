@@ -12,6 +12,7 @@
 
 #include "Tiles.hpp"
 
+namespace MAHJONG {
 void Hand::draw(const pTile& new_tile) {
   auto&& iter = in_hand_.begin();
   while (iter != in_hand_.end()) {
@@ -87,3 +88,4 @@ void Hand::show() const {
 //   }
 //   return res;
 // }
+};  // namespace MAHJONG

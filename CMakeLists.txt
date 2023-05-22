@@ -15,7 +15,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/Common
   ${CMAKE_SOURCE_DIR}/include/Tile
-  ${CMAKE_SOURCE_DIR}/include/Win
+  ${CMAKE_SOURCE_DIR}/include/Yakus
 )# 指定头文件目录
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)

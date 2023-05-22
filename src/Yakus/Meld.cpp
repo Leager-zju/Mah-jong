@@ -1,9 +1,10 @@
-#include "Meld.hpp"
+#include "Yakus/Meld.hpp"
 
 #include <iostream>
 
 #include "Tiles.hpp"
 
+namespace MAHJONG {
 void Meld::show() const {
   switch (meld_type_) {
     case MeldType::Eyes:
@@ -51,3 +52,4 @@ void MeldInId::show() const {
   }
   std::cout << '\n';
 }
+};  // namespace MAHJONG

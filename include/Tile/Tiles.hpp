@@ -4,8 +4,9 @@
 #include <memory>
 #include <string>
 
-#include "TileTypes.hpp"
+#include "Common.hpp"
 
+namespace MAHJONG {
 using pTile = class Tile*;
 
 class Tile {
@@ -15,9 +16,17 @@ class Tile {
   static tile_id transform_string2id(const std::string& str);
   static std::string transform_id2string(tile_id id);
 
+  static bool is_terminal(tile_id id) { return id % 10 != 1 && id % 10 != 9; }
+  static bool is_honor(tile_id id) { return id > 30; }
+  static bool is_wind(tile_id id) { return id > 30 && id < 70; }
+  static bool is_dragon(tile_id id) { return id > 70; }
+  static tile_id next(tile_id id);
+
   void initial();
   std::string get_ANSI();
-  std::string to_string() { return get_ANSI() + transform_id2string(id_) + "\033[0m"; }
+  std::string to_string() {
+    return get_ANSI() + transform_id2string(id_) + "\033[0m";
+  }
   tile_id to_id() { return id_; }
   void become_dora() { is_dora = true; }
   void set_owner(uint8_t index) { owner_index_ = index; }
@@ -27,3 +36,4 @@ class Tile {
   uint8_t owner_index_ = -1;  // -1 for 无主牌, 0~3 for 东南西北
   tile_id id_ = NAT;
 };
+};  // namespace MAHJONG

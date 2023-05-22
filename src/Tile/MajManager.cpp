@@ -1,29 +1,41 @@
 #include "MajManager.hpp"
 
-#include <corecrt.h>
-
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <memory>
 #include <thread>
 
+#include "DoraYaku.hpp"
 #include "PlayerTileManager.hpp"
 #include "Tiles.hpp"
-#include "WinningDetector.hpp"
+#include "TwoPointYaku.hpp"
+#include "YakuMatcher.hpp"
+
+namespace MAHJONG {
+std::unique_ptr<MajManager> MajManager::global_maj_manager_ = nullptr;
 
 MajManager::MajManager()
-    : global_tile_manager_(std::make_unique<GlobalTileManager>()),
-      banker_index_(std::rand() % 4),
-      my_player_index_(std::rand() % 4) {
+    : banker_index_(std::rand() % 4), my_player_index_(std::rand() % 4) {
   player_tile_manager_.reserve(4);
   for (uint16_t i = 0; i < 4; i++) {
-    player_tile_manager_.emplace_back(std::make_unique<PlayerTileManager>(i, i == my_player_index_));
+    player_tile_manager_.emplace_back(
+        std::make_unique<PlayerTileManager>(i, i == my_player_index_));
   }
 }
 
+std::unique_ptr<MajManager>& MajManager::get_maj_manager() {
+  if (!global_maj_manager_.get()) {
+    global_maj_manager_ = std::make_unique<MajManager>();
+  }
+  return global_maj_manager_;
+}
+
 void MajManager::initial() {
+  auto&& global_tile_manager_ = GlobalTileManager::get_tile_manager();
   global_tile_manager_->initial();
   banker_index_ = (banker_index_ + 1) % 4;
   for (size_t round = 0; round < 3; round++) {
@@ -51,11 +63,12 @@ void MajManager::begin_new_round() {
   initial();
   clear_and_print_header();
   size_t index = banker_index_;
-  
+
   bool self_drawn_win = false;
   size_t winner_index = UINT16_MAX;
-  DetectResult res;
-  
+  MatchResult res;
+
+  auto&& global_tile_manager_ = GlobalTileManager::get_tile_manager();
   while (!global_tile_manager_->is_empty()) {
     pTile new_tile = global_tile_manager_->pop();
     player_tile_manager_[index]->draw(new_tile);
@@ -72,7 +85,8 @@ void MajManager::begin_new_round() {
     global_tile_manager_->receive_discard_tile(discard_tile);
 
     clear_and_print_header();
-    std::cout << "Player" << index << " Discard " << discard_tile_string << '\n';
+    std::cout << "Player" << index << " Discard " << discard_tile_string
+              << '\n';
     std::this_thread::sleep_for(std::chrono::seconds(3));
     index = (index + 1) % 4;
   }
@@ -82,12 +96,17 @@ void MajManager::begin_new_round() {
   }
 }
 
-void MajManager::Win(uint16_t winner_index, bool self_drawn_win, DetectResult detect_result) {
-  std::cout << "Player" << winner_index << (self_drawn_win ? " SELF_DRAWN!\n" : " RONHO~\n");
-  print_settle_interface();
+void MajManager::Win(uint16_t winner_index, bool self_drawn_win,
+                     const MatchResult& detect_result) {
+  std::cout << "Player" << winner_index
+            << (self_drawn_win ? " SELF DRAWN!\n" : " RONHO~\n");
+  detect_result.show_result();
+  std::cout << "\n\nPRESS ANY KEY TO CONTINUE...";
+  getchar();
 }
 
 void MajManager::clear_and_print_header() {
+  auto&& global_tile_manager_ = GlobalTileManager::get_tile_manager();
 #ifdef _WIN32
   system("cls");
 #else
@@ -103,7 +122,4 @@ void MajManager::clear_and_print_header() {
   }
   player_tile_manager_[my_player_index_]->show_hand();
 }
-
-void MajManager::print_settle_interface() {
-  
-}
+};  // namespace MAHJONG

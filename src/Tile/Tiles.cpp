@@ -7,8 +7,9 @@
 #include <memory>
 #include <string>
 
-#include "TileTypes.hpp"
+#include "Common.hpp"
 
+namespace MAHJONG {
 tile_id Tile::transform_string2id(const std::string& str) {
   assert(!str.empty() && str.length() <= 2);
   if (str.length() == 1) {
@@ -95,3 +96,16 @@ void Tile::initial() {
   is_dora = false;
   owner_index_ = -1;
 }
+
+tile_id Tile::next(tile_id id) {
+  if (!is_honor(id)) {
+    return id % 10 == 9 ? static_cast<tile_id>(id - 8)
+                        : static_cast<tile_id>(id + 1);
+  }
+  if (is_wind(id)) {
+    return id == _N ? _E : static_cast<tile_id>(id + 10);
+  }
+
+  return id == _F ? _Z : static_cast<tile_id>(id + 10);
+}
+};  // namespace MAHJONG

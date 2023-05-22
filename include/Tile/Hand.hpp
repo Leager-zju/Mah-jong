@@ -6,6 +6,7 @@
 
 #include "Tiles.hpp"
 
+namespace MAHJONG {
 /**
  * 手牌
  */
@@ -25,3 +26,4 @@ class Hand {
  private:
   std::list<pTile> in_hand_;
 };
+};  // namespace MAHJONG
