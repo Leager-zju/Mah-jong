@@ -1,12 +1,9 @@
-#include <memory>
-
 #include "MajManager.hpp"
 
-int main() {
-  srand(static_cast<unsigned int>(time(nullptr)));
+#include <memory>
 
-  std::unique_ptr<MAHJONG::MajManager>& maj_manager =
-      MAHJONG::MajManager::get_maj_manager();
-  maj_manager->begin();
+int main() {
+  auto&& maj_manager = mahjong::MajManager::GetMajManager();
+  maj_manager->Begin();
   return 0;
 }

@@ -4,32 +4,34 @@
 #include "GlobalTileManager.hpp"
 #include "Hand.hpp"
 #include "TwoPointYaku.hpp"
-#include "YakuMatcher.hpp"
+#include "YakusMatcher.hpp"
 
-namespace MAHJONG {
-void Dora::try_match(const Hand& hand, const Expose& expose, bool Riichi,
-                     MatchResult& result) {
-  const std::unique_ptr<GlobalTileManager>& tile_manager =
-      GlobalTileManager::get_tile_manager();
-  for (auto&& tile : hand.get_hands()) {
-    tile_id id = tile->to_id();
-    if (tile_manager->is_dora(id)) {
-      result.dora_++;
+namespace mahjong {
+void Dora::TryMatch(const Hand& hand,
+                    const Expose& expose,
+                    bool Riichi,
+                    MatchResult& result) {
+  const std::unique_ptr<GlobalTileManager>& tile_manager
+      = GlobalTileManager::GetTileManager();
+  for (auto&& tile : hand.GetHands()) {
+    TileId id = tile->ToId();
+    if (tile_manager->IsDora(id)) {
+      result.AddDora(1);
     }
-    if (Riichi && tile_manager->is_inner_dora(id)) {
-      result.inner_dora_++;
+    if (Riichi && tile_manager->IsInnerDora(id)) {
+      result.AddInnerDora(1);
     }
   }
-  for (auto&& meld : expose.get_exposes()) {
-    for (auto tile : meld.meld_) {
-      tile_id id = tile->to_id();
-      if (tile_manager->is_dora(id)) {
-        result.dora_++;
+  for (auto&& meld : expose.GetExposes()) {
+    for (auto tile : meld.GetMeld()) {
+      TileId id = tile->ToId();
+      if (tile_manager->IsDora(id)) {
+        result.AddDora(1);
       }
-      if (Riichi && tile_manager->is_inner_dora(id)) {
-        result.inner_dora_++;
+      if (Riichi && tile_manager->IsInnerDora(id)) {
+        result.AddInnerDora(1);
       }
     }
   }
 }
-};  // namespace MAHJONG
+};  // namespace mahjong

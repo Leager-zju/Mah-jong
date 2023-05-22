@@ -1,33 +1,32 @@
 #include "Tiles.hpp"
 
-#include <assert.h>
+#include "Common.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include "Common.hpp"
-
-namespace MAHJONG {
-tile_id Tile::transform_string2id(const std::string& str) {
+namespace mahjong {
+TileId Tile::TransformString2id(const std::string& str) {
   assert(!str.empty() && str.length() <= 2);
   if (str.length() == 1) {
     switch (str[0]) {
       case 'E':
-        return _E;
+        return E;
       case 'S':
-        return _S;
+        return S;
       case 'W':
-        return _W;
+        return W;
       case 'N':
-        return _N;
+        return N;
       case 'Z':
-        return _Z;
+        return Z;
       case 'B':
-        return _B;
+        return B;
       case 'F':
-        return _F;
+        return F;
       default:
         return NAT;
     }
@@ -35,21 +34,21 @@ tile_id Tile::transform_string2id(const std::string& str) {
     uint16_t rank = str[0] - '0';
     switch (str[1]) {
       case 'm':
-        return static_cast<tile_id>(rank);
+        return static_cast<TileId>(rank);
       case 'p':
-        return static_cast<tile_id>(10 + rank);
+        return static_cast<TileId>(PIN + rank);
       case 's':
-        return static_cast<tile_id>(20 + rank);
+        return static_cast<TileId>(SOU + rank);
       default:
         return NAT;
     }
   }
 }
 
-std::string Tile::transform_id2string(tile_id id) {
+std::string Tile::TransformId2string(TileId id) {
   std::string res;
   uint16_t category = id / 10;
-  uint16_t rank = id % 10;
+  uint16_t rank     = id % 10;
 
   switch (category) {
     case 0:
@@ -77,7 +76,7 @@ std::string Tile::transform_id2string(tile_id id) {
   }
 }
 
-std::string Tile::get_ANSI() {
+std::string Tile::GetAnsi() const {
   switch (owner_index_) {
     case 0:
       return "\033[31m";
@@ -92,20 +91,19 @@ std::string Tile::get_ANSI() {
   return "";
 }
 
-void Tile::initial() {
-  is_dora = false;
+void Tile::Initial() {
   owner_index_ = -1;
 }
 
-tile_id Tile::next(tile_id id) {
-  if (!is_honor(id)) {
-    return id % 10 == 9 ? static_cast<tile_id>(id - 8)
-                        : static_cast<tile_id>(id + 1);
+TileId Tile::Next(TileId id) {
+  if (!IsHonor(id)) {
+    return id % 10 == 9 ? static_cast<TileId>(id - 8)
+                        : static_cast<TileId>(id + 1);
   }
-  if (is_wind(id)) {
-    return id == _N ? _E : static_cast<tile_id>(id + 10);
+  if (IsWind(id)) {
+    return id == N ? E : static_cast<TileId>(id + 10);
   }
 
-  return id == _F ? _Z : static_cast<tile_id>(id + 10);
+  return id == F ? Z : static_cast<TileId>(id + 10);
 }
-};  // namespace MAHJONG
+};  // namespace mahjong

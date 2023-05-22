@@ -1,221 +1,226 @@
 #include "OnePointYaku.hpp"
 
+#include "Common.hpp"
+#include "GlobalTileManager.hpp"
+#include "Meld.hpp"
+#include "YakusMatcher.hpp"
+
 #include <unordered_set>
 
-#include "Common.hpp"
-#include "Meld.hpp"
-#include "Tiles.hpp"
-#include "YakuMatcher.hpp"
-
-namespace MAHJONG {
-void Tsumo::try_match(bool self_drawn, MatchResult& result) {
+namespace mahjong {
+void Tsumo::TryMatch(bool self_drawn, MatchResult& result) {
   if (self_drawn) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::Tsumo);
+    result.AddPoint(1);
+    result.AddYaku(YakuType::Tsumo);
   }
 }
 
-void Riichi::try_match(MatchResult& result) {
-  result.points_++;
-  result.Yakus_matched_.push_back(YakuType::Riichi);
+void Riichi::TryMatch(MatchResult& result) {
+  result.AddPoint(1);
+  result.AddYaku(YakuType::Riichi);
 }
 
-void UnderTheSeaOrRiver::try_match(bool self_drawn, MatchResult& result) {
-  auto&& global_tile_manager_ = GlobalTileManager::get_tile_manager();
-  if (global_tile_manager_->is_empty()) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(self_drawn ? YakuType::UnderTheSea
-                                               : YakuType::UnderTheRiver);
+void UnderTheSeaOrRiver::TryMatch(bool self_drawn, MatchResult& result) {
+  auto&& global_tile_manager = GlobalTileManager::GetTileManager();
+  if (global_tile_manager->IsEmpty()) {
+    result.AddPoint(1);
+    result.AddYaku(self_drawn ? YakuType::UnderTheSea
+                              : YakuType::UnderTheRiver);
   }
 }
 
-void Wind::try_match(const std::vector<MeldInId>& hand,
-                     const std::vector<MeldInId>& expose,
-                     const std::unique_ptr<MajManager>& maj_manager,
-                     MatchResult& result) {
+void Wind::TryMatch(const std::vector<MeldInId>& hand,
+                    const std::vector<MeldInId>& expose,
+                    const std::unique_ptr<MajManager>& maj_manager,
+                    MatchResult& result) {
   // 大四喜->小四喜->自风/场风
-  uint8_t east_triplet = 0;
+  uint8_t east_triplet  = 0;
   uint8_t south_triplet = 0;
-  uint8_t west_triplet = 0;
+  uint8_t west_triplet  = 0;
   uint8_t north_triplet = 0;
 
   for (auto&& meld : hand) {
-    if (meld.meld_type_ == MeldType::Triplet) {
-      if (meld.tile_ids_[0] == _E) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Triplet) {
+      if (tile_ids[0] == E) {
         east_triplet = 1;
-      } else if (meld.tile_ids_[0] == _S) {
+      } else if (tile_ids[0] == S) {
         south_triplet = 1;
-      } else if (meld.tile_ids_[0] == _W) {
+      } else if (tile_ids[0] == W) {
         west_triplet = 1;
-      } else if (meld.tile_ids_[0] == _N) {
+      } else if (tile_ids[0] == N) {
         north_triplet = 1;
       }
     }
   }
 
   for (auto&& meld : expose) {
-    if (meld.meld_type_ != MeldType::Sequence) {  // 刻/杠
-      if (meld.tile_ids_[0] == _E) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() != MeldType::Sequence) {  // 刻/杠
+      if (tile_ids[0] == E) {
         east_triplet = 1;
-      } else if (meld.tile_ids_[0] == _S) {
+      } else if (tile_ids[0] == S) {
         south_triplet = 1;
-      } else if (meld.tile_ids_[0] == _W) {
+      } else if (tile_ids[0] == W) {
         west_triplet = 1;
-      } else if (meld.tile_ids_[0] == _N) {
+      } else if (tile_ids[0] == N) {
         north_triplet = 1;
       }
     }
   }
 
-  uint16_t seat_wind = maj_manager->get_seat_wind();
-  uint16_t banker_index = maj_manager->get_banker_index();
-  uint16_t player_index = maj_manager->get_my_player_index();
+  uint16_t seat_wind      = maj_manager->GetSeatWind();
+  uint16_t banker_index   = maj_manager->GetBankerIndex();
+  uint16_t player_index   = maj_manager->GetMyPlayerIndex();
   uint16_t prevalent_wind = (player_index - banker_index + 4) % 4;
 
-  if ((seat_wind == 0 && east_triplet) || (seat_wind == 1 && south_triplet) ||
-      (seat_wind == 2 && west_triplet) || (seat_wind == 3 && north_triplet)) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::SeatWind);
+  if ((seat_wind == 0 && east_triplet) || (seat_wind == 1 && south_triplet)
+      || (seat_wind == 2 && west_triplet)
+      || (seat_wind == 3 && north_triplet)) {
+    result.AddPoint(1);
+    result.AddYaku(YakuType::SeatWind);
   }
-  if ((prevalent_wind == 0 && east_triplet) ||
-      (prevalent_wind == 1 && south_triplet) ||
-      (prevalent_wind == 2 && west_triplet) ||
-      (prevalent_wind == 3 && north_triplet)) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::PrevalentWind);
+  if ((prevalent_wind == 0 && east_triplet)
+      || (prevalent_wind == 1 && south_triplet)
+      || (prevalent_wind == 2 && west_triplet)
+      || (prevalent_wind == 3 && north_triplet)) {
+    result.AddPoint(1);
+    result.AddYaku(YakuType::PrevalentWind);
   }
 }
 
-void Dragon::try_match(const std::vector<MeldInId>& hand,
-                       const std::vector<MeldInId>& expose,
-                       MatchResult& result) {
-  uint8_t red_triplet = 0;
+void Dragon::TryMatch(const std::vector<MeldInId>& hand,
+                      const std::vector<MeldInId>& expose,
+                      MatchResult& result) {
+  uint8_t red_triplet   = 0;
   uint8_t white_triplet = 0;
   uint8_t green_triplet = 0;
-  uint8_t dragon_eyes = 0;
+  uint8_t dragon_eyes   = 0;
 
   for (auto&& meld : hand) {
-    if (meld.meld_type_ == MeldType::Triplet) {
-      if (meld.tile_ids_[0] == _Z) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Triplet) {
+      if (tile_ids[0] == Z) {
         red_triplet = 1;
-      } else if (meld.tile_ids_[0] == _B) {
+      } else if (tile_ids[0] == B) {
         white_triplet = 1;
-      } else if (meld.tile_ids_[0] == _F) {
+      } else if (tile_ids[0] == F) {
         green_triplet = 1;
       }
     }
 
-    if (meld.meld_type_ == MeldType::Eyes) {
-      if (meld.tile_ids_[0] == _Z || meld.tile_ids_[0] == _B ||
-          meld.tile_ids_[0] == _F) {
+    if (meld.GetMeldType() == MeldType::Eyes) {
+      if (Tile::IsDragon(tile_ids[0])) {
         dragon_eyes = 1;
       }
     }
   }
 
   for (auto&& meld : expose) {
-    if (meld.meld_type_ != MeldType::Sequence) {  // 刻/杠
-      if (meld.tile_ids_[0] == _Z) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() != MeldType::Sequence) {  // 刻/杠
+      if (tile_ids[0] == Z) {
         red_triplet = 1;
-      } else if (meld.tile_ids_[0] == _B) {
+      } else if (tile_ids[0] == B) {
         white_triplet = 1;
-      } else if (meld.tile_ids_[0] == _F) {
+      } else if (tile_ids[0] == F) {
         green_triplet = 1;
       }
     }
   }
 
   if (red_triplet + white_triplet + green_triplet == 2 && dragon_eyes) {
-    result.points_ += 2;
-    result.Yakus_matched_.push_back(YakuType::SmallThreeDragons);
+    result.AddPoint(2);
+    result.AddYaku(YakuType::SmallThreeDragons);
     return;
   }
 
   if (red_triplet) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::RedDragon);
+    result.AddPoint(1);
+    result.AddYaku(YakuType::RedDragon);
   }
   if (white_triplet) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::WhiteDragon);
+    result.AddPoint(1);
+    result.AddYaku(YakuType::WhiteDragon);
   }
   if (green_triplet) {
-    result.points_ += 1;
-    result.Yakus_matched_.push_back(YakuType::GreenDragon);
+    result.AddPoint(1);
+    result.AddYaku(YakuType::GreenDragon);
   }
 }
 
-void AllSimple::try_match(const std::vector<MeldInId>& hand,
-                          const std::vector<MeldInId>& expose,
-                          MatchResult& result) {
+void AllSimple::TryMatch(const std::vector<MeldInId>& hand,
+                         const std::vector<MeldInId>& expose,
+                         MatchResult& result) {
   for (auto&& meld : hand) {
-    if (meld.meld_type_ == MeldType::Sequence) {
-      if (Tile::is_terminal(meld.tile_ids_[0]) ||
-          Tile::is_terminal(meld.tile_ids_[2])) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Sequence) {
+      if (Tile::IsTerminal(tile_ids[0]) || Tile::IsTerminal(tile_ids[2])) {
         return;
       }
     } else {
-      if (Tile::is_terminal(meld.tile_ids_[0])) {
+      if (Tile::IsTerminal(tile_ids[0])) {
         return;
       }
     }
   }
   for (auto&& meld : expose) {
-    if (meld.meld_type_ == MeldType::Sequence) {
-      if (Tile::is_terminal(meld.tile_ids_[0]) ||
-          Tile::is_terminal(meld.tile_ids_[2])) {
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Sequence) {
+      if (Tile::IsTerminal(tile_ids[0]) || Tile::IsTerminal(tile_ids[2])) {
         return;
       }
     } else {
-      if (Tile::is_terminal(meld.tile_ids_[0])) {
+      if (Tile::IsTerminal(tile_ids[0])) {
         return;
       }
     }
   }
 
-  result.points_ += 1;
-  result.Yakus_matched_.push_back(YakuType::AllSimple);
+  result.AddPoint(1);
+  result.AddYaku(YakuType::AllSimple);
 }
 
-void PureDoubleSequence::try_match(const std::vector<MeldInId>& hand,
-                                   const std::vector<MeldInId>& expose,
-                                   MatchResult& result) {
+void PureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
+                                  const std::vector<MeldInId>& expose,
+                                  MatchResult& result) {
   assert(expose.empty());
-  std::unordered_set<tile_id> occured;
+  std::unordered_set<TileId> occured;
   for (auto&& meld : hand) {
-    if (meld.meld_type_ == MeldType::Sequence) {
-      if (occured.count(meld.tile_ids_[0])) {
-        result.points_ += 1;
-        result.Yakus_matched_.push_back(YakuType::PureDoubleSequence);
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Sequence) {
+      if (occured.count(tile_ids[0])) {
+        result.AddPoint(1);
+        result.AddYaku(YakuType::PureDoubleSequence);
         return;
       }
-      occured.insert(meld.tile_ids_[0]);
+      occured.insert(tile_ids[0]);
     }
   }
 }
 
-void Pinfu::try_match(const std::vector<MeldInId>& hand, tile_id new_tile_id,
-                      MatchResult& result) {
+void Pinfu::TryMatch(const std::vector<MeldInId>& hand,
+                     TileId new_tile_id,
+                     MatchResult& result) {
   for (auto&& meld : hand) {
-    if (meld.meld_type_ == MeldType::Sequence) {
-      if (meld.tile_ids_[0] == new_tile_id &&
-          !Tile::is_terminal(meld.tile_ids_[2])) {
-        result.points_ += 1;
-        result.Yakus_matched_.push_back(YakuType::Pinfu);
+    auto&& tile_ids = meld.GetTileId();
+    if (meld.GetMeldType() == MeldType::Sequence) {
+      if (tile_ids[0] == new_tile_id && !Tile::IsTerminal(tile_ids[2])) {
+        result.AddPoint(1);
+        result.AddYaku(YakuType::Pinfu);
         return;
       }
 
-      if (meld.tile_ids_[2] == new_tile_id &&
-          !Tile::is_terminal(meld.tile_ids_[1])) {
-        result.points_ += 1;
-        result.Yakus_matched_.push_back(YakuType::Pinfu);
+      if (tile_ids[2] == new_tile_id && !Tile::IsTerminal(tile_ids[1])) {
+        result.AddPoint(1);
+        result.AddYaku(YakuType::Pinfu);
         return;
       }
     }
   }
 }
 
-void Ippatsu::try_match(MatchResult& result) {
+void Ippatsu::TryMatch(MatchResult& result) {
   // TODO(Leager)
 }
-};  // namespace MAHJONG
+};  // namespace mahjong

@@ -1,39 +1,50 @@
 #pragma once
 
+#include "Common.hpp"
+
 #include <cstdint>
 #include <memory>
 #include <string>
 
-#include "Common.hpp"
-
-namespace MAHJONG {
+namespace mahjong {
 using pTile = class Tile*;
 
 class Tile {
  public:
-  explicit Tile(tile_id id) : id_(id) {}
-  explicit Tile(const std::string& str) : id_(transform_string2id(str)) {}
-  static tile_id transform_string2id(const std::string& str);
-  static std::string transform_id2string(tile_id id);
+  explicit Tile(TileId id) : id_(id) {}
+  explicit Tile(const std::string& str) : id_(TransformString2id(str)) {}
+  static TileId TransformString2id(const std::string& str);
+  static std::string TransformId2string(TileId id);
 
-  static bool is_terminal(tile_id id) { return id % 10 != 1 && id % 10 != 9; }
-  static bool is_honor(tile_id id) { return id > 30; }
-  static bool is_wind(tile_id id) { return id > 30 && id < 70; }
-  static bool is_dragon(tile_id id) { return id > 70; }
-  static tile_id next(tile_id id);
-
-  void initial();
-  std::string get_ANSI();
-  std::string to_string() {
-    return get_ANSI() + transform_id2string(id_) + "\033[0m";
+  static bool IsTerminal(TileId id) {
+    return id == _1m || id == _9m || id == _1p || id == _9p || id == _1s
+           || id == _9s || IsHonor(id);
   }
-  tile_id to_id() { return id_; }
-  void become_dora() { is_dora = true; }
-  void set_owner(uint8_t index) { owner_index_ = index; }
+  static bool IsHonor(TileId id) {
+    return IsWind(id) || IsDragon(id);
+  }
+  static bool IsWind(TileId id) {
+    return id == E || id == S || id == W || id == N;
+  }
+  static bool IsDragon(TileId id) {
+    return id == Z || id == B || id == F;
+  }
+  static TileId Next(TileId id);
 
- protected:
-  bool is_dora = false;
+  void Initial();
+  std::string GetAnsi() const;
+  std::string ToString() const {
+    return GetAnsi() + TransformId2string(id_) + "\033[0m";
+  }
+  TileId ToId() const {
+    return id_;
+  }
+  void SetOwner(uint8_t index) {
+    owner_index_ = index;
+  }
+
+ private:
   uint8_t owner_index_ = -1;  // -1 for 无主牌, 0~3 for 东南西北
-  tile_id id_ = NAT;
+  TileId id_           = NAT;
 };
-};  // namespace MAHJONG
+};  // namespace mahjong

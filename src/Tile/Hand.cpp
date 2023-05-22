@@ -1,5 +1,7 @@
 #include "Hand.hpp"
 
+#include "Tiles.hpp"
+
 #include <corecrt.h>
 
 #include <algorithm>
@@ -9,14 +11,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
+#include <random>
 
-#include "Tiles.hpp"
-
-namespace MAHJONG {
-void Hand::draw(const pTile& new_tile) {
+namespace mahjong {
+void Hand::Draw(const pTile& new_tile) {
   auto&& iter = in_hand_.begin();
   while (iter != in_hand_.end()) {
-    if ((*iter)->to_id() >= new_tile->to_id()) {
+    if ((*iter)->ToId() >= new_tile->ToId()) {
       break;
     }
     iter++;
@@ -24,10 +25,10 @@ void Hand::draw(const pTile& new_tile) {
   in_hand_.emplace(iter, new_tile);
 }
 
-bool Hand::discard(const std::string& discard_string, pTile& discard_tile) {
-  tile_id id = Tile::transform_string2id(discard_string);
+bool Hand::Discard(const std::string& discard_string, pTile& discard_tile) {
+  TileId id = Tile::TransformString2id(discard_string);
   for (auto&& iter = in_hand_.begin(); iter != in_hand_.end(); iter++) {
-    if ((*iter)->to_id() == id) {
+    if ((*iter)->ToId() == id) {
       discard_tile = *iter;
       in_hand_.erase(iter);
       return true;
@@ -36,10 +37,14 @@ bool Hand::discard(const std::string& discard_string, pTile& discard_tile) {
   return false;
 }
 
-pTile Hand::random_discard() {
-  size_t rd = std::rand() % in_hand_.size();
+pTile Hand::RandomDiscard() {
+  std::random_device rand;
+  std::mt19937 mt(rand());
+  std::uniform_real_distribution<size_t> dist(in_hand_.size());
+  size_t rand_index = dist(mt);
+
   auto&& iter = in_hand_.begin();
-  for (size_t i = 0; i < rd; i++) {
+  for (size_t i = 0; i < rand_index; i++) {
     iter++;
   }
   pTile res = *iter;
@@ -47,25 +52,25 @@ pTile Hand::random_discard() {
   return res;
 }
 
-void Hand::show() const {
+void Hand::Show() const {
   std::cout << "Hands: ";
   for (auto&& tile : in_hand_) {
-    std::cout << tile->to_string() << " ";
+    std::cout << tile->ToString() << " ";
   }
   std::cout << '\n';
 }
 
 // void Hand::check_concealed_kong(int& start_index) {
-//   uint16_t id = in_hand_[0]->to_id();
+//   uint16_t id = in_hand_[0]->ToId();
 //   uint16_t count = 1;
 //   for (auto&& i = 1; i < in_hand_.size(); i++) {
-//     if (in_hand_[i]->to_id() == id) {
+//     if (in_hand_[i]->ToId() == id) {
 //       if (++count == 4) {
 //         start_index = i - 3;
 //         return;
 //       }
 //     } else {
-//       id = in_hand_[i]->to_id();
+//       id = in_hand_[i]->ToId();
 //       count = 1;
 //     }
 //   }
@@ -73,7 +78,7 @@ void Hand::show() const {
 
 // bool Hand::try_concealed_kong(const int start_index) {
 //   char response;
-//   std::cout << "Kong " << in_hand_[start_index]->to_string() << " ?[y/n]";
+//   std::cout << "Kong " << in_hand_[start_index]->ToString() << " ?[y/n]";
 //   std::cin >> response;
 //   assert(response == 'y' || response == 'n');
 //   return response == 'y';
@@ -88,4 +93,4 @@ void Hand::show() const {
 //   }
 //   return res;
 // }
-};  // namespace MAHJONG
+};  // namespace mahjong

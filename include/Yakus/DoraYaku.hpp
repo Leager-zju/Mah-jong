@@ -2,17 +2,18 @@
 
 #include <vector>
 
-#include "GlobalTileManager.hpp"
-
-namespace MAHJONG {
+namespace mahjong {
 
 class Expose;
 class Hand;
 class MeldInId;
+struct MatchResult;
 
 class Dora {
  public:
-  static void try_match(const Hand& hand, const Expose& expose, bool Riichi,
-                        MatchResult& result);
+  static void TryMatch(const Hand& hand,
+                       const Expose& expose,
+                       bool Riichi,
+                       MatchResult& result);
 };
-};  // namespace MAHJONG
+};  // namespace mahjong

@@ -1,11 +1,11 @@
 #include "Yakus/Meld.hpp"
 
-#include <iostream>
-
 #include "Tiles.hpp"
 
-namespace MAHJONG {
-void Meld::show() const {
+#include <iostream>
+
+namespace mahjong {
+void Meld::Show() const {
   switch (meld_type_) {
     case MeldType::Eyes:
       std::cout << "Eyes: ";
@@ -24,12 +24,12 @@ void Meld::show() const {
       break;
   }
   for (auto&& tile : meld_) {
-    std::cout << tile->to_string();
+    std::cout << tile->ToString();
   }
   std::cout << '\n';
 }
 
-void MeldInId::show() const {
+void MeldInId::Show() const {
   switch (meld_type_) {
     case MeldType::Eyes:
       std::cout << "Eyes: ";
@@ -48,8 +48,8 @@ void MeldInId::show() const {
       break;
   }
   for (auto&& id : tile_ids_) {
-    std::cout << Tile::transform_id2string(id);
+    std::cout << Tile::TransformId2string(id);
   }
   std::cout << '\n';
 }
-};  // namespace MAHJONG
+};  // namespace mahjong
