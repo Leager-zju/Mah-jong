@@ -2,6 +2,7 @@
 
 #include "Common.hpp"
 #include "GlobalTileManager.hpp"
+#include "MajManager.hpp"
 #include "Meld.hpp"
 #include "YakusMatcher.hpp"
 
@@ -31,8 +32,8 @@ void UnderTheSeaOrRiver::TryMatch(bool self_drawn, MatchResult& result) {
 
 void Wind::TryMatch(const std::vector<MeldInId>& hand,
                     const std::vector<MeldInId>& expose,
-                    const std::unique_ptr<MajManager>& maj_manager,
                     MatchResult& result) {
+  auto&& maj_manager = MajManager::GetMajManager();
   // 大四喜->小四喜->自风/场风
   uint8_t east_triplet  = 0;
   uint8_t south_triplet = 0;
@@ -109,10 +110,8 @@ void Dragon::TryMatch(const std::vector<MeldInId>& hand,
       }
     }
 
-    if (meld.GetMeldType() == MeldType::Eyes) {
-      if (Tile::IsDragon(tile_ids[0])) {
-        dragon_eyes = 1;
-      }
+    if (meld.GetMeldType() == MeldType::Eyes && Tile::IsDragon(tile_ids[0])) {
+      dragon_eyes = 1;
     }
   }
 
@@ -154,26 +153,18 @@ void AllSimple::TryMatch(const std::vector<MeldInId>& hand,
                          MatchResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
-    if (meld.GetMeldType() == MeldType::Sequence) {
-      if (Tile::IsTerminal(tile_ids[0]) || Tile::IsTerminal(tile_ids[2])) {
-        return;
-      }
-    } else {
-      if (Tile::IsTerminal(tile_ids[0])) {
-        return;
-      }
+    if (Tile::IsTerminal(tile_ids[0])
+        || (meld.GetMeldType() == MeldType::Sequence
+            && Tile::IsTerminal(tile_ids[2]))) {
+      return;
     }
   }
   for (auto&& meld : expose) {
     auto&& tile_ids = meld.GetTileId();
-    if (meld.GetMeldType() == MeldType::Sequence) {
-      if (Tile::IsTerminal(tile_ids[0]) || Tile::IsTerminal(tile_ids[2])) {
-        return;
-      }
-    } else {
-      if (Tile::IsTerminal(tile_ids[0])) {
-        return;
-      }
+    if (Tile::IsTerminal(tile_ids[0])
+        || (meld.GetMeldType() == MeldType::Sequence
+            && Tile::IsTerminal(tile_ids[2]))) {
+      return;
     }
   }
 
@@ -182,9 +173,7 @@ void AllSimple::TryMatch(const std::vector<MeldInId>& hand,
 }
 
 void PureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
-                                  const std::vector<MeldInId>& expose,
                                   MatchResult& result) {
-  assert(expose.empty());
   std::unordered_set<TileId> occured;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();

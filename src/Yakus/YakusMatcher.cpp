@@ -3,7 +3,6 @@
 #include "Common.hpp"
 #include "Expose.hpp"
 #include "Hand.hpp"
-#include "MajManager.hpp"
 #include "Meld.hpp"
 #include "OnePointYaku.hpp"
 #include "ThreePointYaku.hpp"
@@ -114,6 +113,7 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
                                           pTile new_tile,
                                           bool Riichi,
                                           bool self_drawn) {
+  MatchResult result{};
   std::vector<MeldInId> hand_melds_in_id;
   std::vector<MeldInId> expose_melds_in_id;
   hand_melds_in_id.reserve(5);
@@ -121,11 +121,11 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
   BuildMelds(hand, expose, new_tile, hand_melds_in_id, expose_melds_in_id);
 
   if (hand_melds_in_id.empty()) {
-    return {};
+    return result;
   }
 
-  TileId id = new_tile->ToId();
-  MatchResult result;
+  TileId id = new_tile->GetId();
+
   bool menzenchin = true;
   for (auto&& meld : expose_melds_in_id) {
     if (meld.GetMeldType() != MeldType::ConcealedKong) {
@@ -158,9 +158,8 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
     Tsumo::TryMatch(self_drawn, result);
   }
   if (menzenchin) {
-    Pinfu::TryMatch(hand_melds_in_id, new_tile->ToId(), result);
-    PureDoubleSequence::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
-    Flush::TryMatch(hand_melds_in_id, expose_melds_in_id, menzenchin, result);
+    Pinfu::TryMatch(hand_melds_in_id, new_tile->GetId(), result);
+    PureDoubleSequence::TryMatch(hand_melds_in_id, result);
     TwicePureDoubleSequence::TryMatch(hand_melds_in_id, result);
     if (!result.GetYakusMatched().empty()
         && result.GetYakusMatched().back()
@@ -170,10 +169,7 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
   }
 
   UnderTheSeaOrRiver::TryMatch(self_drawn, result);
-  Wind::TryMatch(hand_melds_in_id,
-                 expose_melds_in_id,
-                 MajManager::GetMajManager(),
-                 result);
+  Wind::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
   Dragon::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
 
   OutsideHand::TryMatch(
@@ -187,7 +183,7 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
   ThreeConcealedTriplets::TryMatch(
       hand_melds_in_id, expose_melds_in_id, result);
   AllTerminalsAndHonors::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
-
+  Flush::TryMatch(hand_melds_in_id, expose_melds_in_id, menzenchin, result);
   return result;
 }
 
@@ -199,7 +195,7 @@ void YakusMatcher::BuildMelds(const Hand& hand,
   // make melds
   std::unordered_map<TileId, size_t> table;
   for (auto&& tile : hand.GetHands()) {
-    TileId id   = tile->ToId();
+    TileId id   = tile->GetId();
     auto&& iter = table.find(id);
     if (iter == table.end()) {
       table.emplace(id, 1);
@@ -207,7 +203,7 @@ void YakusMatcher::BuildMelds(const Hand& hand,
       iter->second++;
     }
   }
-  TileId new_tile_id = new_tile->ToId();
+  TileId new_tile_id = new_tile->GetId();
   auto&& new_iter    = table.find(new_tile_id);
   if (new_iter == table.end()) {
     table.emplace(new_tile_id, 1);

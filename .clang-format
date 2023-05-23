@@ -41,6 +41,6 @@ QualifierOrder:
   ["inline", "static", "constexpr", "const","type", "restrict",  "volatile"]
 ReferenceAlignment: Pointer
 ReflowComments: false
-RemoveSemicolon: true                   # TODO: LLVM 16
-RequiresExpressionIndentation: Keyword  # TODO: LLVM 16
+# RemoveSemicolon: true                   # TODO: LLVM 16
+# RequiresExpressionIndentation: Keyword  # TODO: LLVM 16
 ShortNamespaceLines: 0

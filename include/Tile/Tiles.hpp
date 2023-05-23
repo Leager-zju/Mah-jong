@@ -36,7 +36,7 @@ class Tile {
   std::string ToString() const {
     return GetAnsi() + TransformId2string(id_) + "\033[0m";
   }
-  TileId ToId() const {
+  TileId GetId() const {
     return id_;
   }
   void SetOwner(uint8_t index) {

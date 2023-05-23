@@ -17,7 +17,7 @@ namespace mahjong {
 void Hand::Draw(const pTile& new_tile) {
   auto&& iter = in_hand_.begin();
   while (iter != in_hand_.end()) {
-    if ((*iter)->ToId() >= new_tile->ToId()) {
+    if ((*iter)->GetId() >= new_tile->GetId()) {
       break;
     }
     iter++;
@@ -27,10 +27,14 @@ void Hand::Draw(const pTile& new_tile) {
 
 bool Hand::Discard(const std::string& discard_string, pTile& discard_tile) {
   TileId id = Tile::TransformString2id(discard_string);
+  std::cout << id << " ";
+  for (auto&& tile : in_hand_) {
+    std::cout << tile->GetId() << ' ';
+  }
   for (auto&& iter = in_hand_.begin(); iter != in_hand_.end(); iter++) {
-    if ((*iter)->ToId() == id) {
+    if ((*iter)->GetId() == id) {
       discard_tile = *iter;
-      in_hand_.erase(iter);
+      RemoveTile(iter);
       return true;
     }
   }
@@ -40,7 +44,7 @@ bool Hand::Discard(const std::string& discard_string, pTile& discard_tile) {
 pTile Hand::RandomDiscard() {
   std::random_device rand;
   std::mt19937 mt(rand());
-  std::uniform_real_distribution<size_t> dist(in_hand_.size());
+  std::uniform_int_distribution<size_t> dist(0, in_hand_.size() - 1);
   size_t rand_index = dist(mt);
 
   auto&& iter = in_hand_.begin();
@@ -61,16 +65,16 @@ void Hand::Show() const {
 }
 
 // void Hand::check_concealed_kong(int& start_index) {
-//   uint16_t id = in_hand_[0]->ToId();
+//   uint16_t id = in_hand_[0]->GetId();
 //   uint16_t count = 1;
 //   for (auto&& i = 1; i < in_hand_.size(); i++) {
-//     if (in_hand_[i]->ToId() == id) {
+//     if (in_hand_[i]->GetId() == id) {
 //       if (++count == 4) {
 //         start_index = i - 3;
 //         return;
 //       }
 //     } else {
-//       id = in_hand_[i]->ToId();
+//       id = in_hand_[i]->GetId();
 //       count = 1;
 //     }
 //   }

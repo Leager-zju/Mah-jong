@@ -1,6 +1,7 @@
 #include "Tiles.hpp"
 
 #include "Common.hpp"
+#include "global.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -10,7 +11,7 @@
 
 namespace mahjong {
 TileId Tile::TransformString2id(const std::string& str) {
-  assert(!str.empty() && str.length() <= 2);
+  assert(str.length() >= 1 && str.length() <= 2);
   if (str.length() == 1) {
     switch (str[0]) {
       case 'E':
@@ -77,18 +78,7 @@ std::string Tile::TransformId2string(TileId id) {
 }
 
 std::string Tile::GetAnsi() const {
-  switch (owner_index_) {
-    case 0:
-      return "\033[31m";
-    case 1:
-      return "\033[32m";
-    case 2:
-      return "\033[33m";
-    case 3:
-      return "\033[34m";
-  }
-
-  return "";
+  return global::GetColor(owner_index_);
 }
 
 void Tile::Initial() {

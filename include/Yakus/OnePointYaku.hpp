@@ -1,7 +1,5 @@
 #pragma once
 
-#include "MajManager.hpp"
-
 #include <cstdint>
 #include <vector>
 
@@ -42,7 +40,6 @@ class Wind {
  public:
   static void TryMatch(const std::vector<MeldInId>& hand,
                        const std::vector<MeldInId>& expose,
-                       const std::unique_ptr<MajManager>& maj_manager,
                        MatchResult& result);
 };
 
@@ -66,7 +63,6 @@ class AllSimple {
 class PureDoubleSequence {
  public:
   static void TryMatch(const std::vector<MeldInId>& hand,
-                       const std::vector<MeldInId>& expose,
                        MatchResult& result);
 };
 

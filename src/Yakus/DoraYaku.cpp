@@ -14,7 +14,7 @@ void Dora::TryMatch(const Hand& hand,
   const std::unique_ptr<GlobalTileManager>& tile_manager
       = GlobalTileManager::GetTileManager();
   for (auto&& tile : hand.GetHands()) {
-    TileId id = tile->ToId();
+    TileId id = tile->GetId();
     if (tile_manager->IsDora(id)) {
       result.AddDora(1);
     }
@@ -24,7 +24,7 @@ void Dora::TryMatch(const Hand& hand,
   }
   for (auto&& meld : expose.GetExposes()) {
     for (auto tile : meld.GetMeld()) {
-      TileId id = tile->ToId();
+      TileId id = tile->GetId();
       if (tile_manager->IsDora(id)) {
         result.AddDora(1);
       }

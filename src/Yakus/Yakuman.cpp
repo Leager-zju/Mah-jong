@@ -140,7 +140,7 @@ void ThirteenOrphans::TryMatch(const Hand& hand,
                                MatchResult& result) {
   std::unordered_set<TileId> tile_set;
   for (auto&& tile : hand.GetHands()) {
-    tile_set.insert(tile->ToId());
+    tile_set.insert(tile->GetId());
   }
   if (tile_set.size() == 12 && tile_set.find(new_tile_id) == tile_set.end()) {
     result.AddYakuman(1);
@@ -199,10 +199,10 @@ void NineGates::TryMatch(const Hand& hand,
                          TileId new_tile_id,
                          MatchResult& result) {
   std::unordered_map<TileId, uint8_t> counts;
-  uint8_t category = hand.GetHands().front()->ToId() / 10;
+  uint8_t category = hand.GetHands().front()->GetId() / 10;
 
   for (auto&& tile : hand.GetHands()) {
-    TileId id = tile->ToId();
+    TileId id = tile->GetId();
     if (id / 10 != category) {
       return;
     }

@@ -20,6 +20,12 @@ class PlayerTileManager {
         is_my_player_(is_my_player) {}
   void Draw(pTile new_tile);
   MatchResult TrySelfDrawn(pTile new_tile);
+
+  bool TryChi(pTile new_tile);
+  bool TryPong(pTile new_tile, uint16_t discard_player_index);
+  bool TryKong(pTile new_tile, uint16_t discard_player_index);
+  MatchResult TryWin(pTile new_tile);
+
   pTile Discard() const;
 
   void ShowHand() const;

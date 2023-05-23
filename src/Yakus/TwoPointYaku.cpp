@@ -35,6 +35,9 @@ void OutsideHand::TryMatch(const std::vector<MeldInId>& hand,
             || !Tile::IsTerminal(tile_ids[2]))) {
       return;
     }
+    if (!half && Tile::IsHonor(tile_ids[0])) {
+      half = true;
+    }
   }
 
   if (half) {
@@ -147,7 +150,7 @@ void TripleTriplet::TryMatch(const std::vector<MeldInId>& hand,
     if (meld.GetMeldType() == MeldType::Triplet
         || meld.GetMeldType() == MeldType::ConcealedKong
         || meld.GetMeldType() == MeldType::ExposeKong) {
-      if (triplet_count.count(tile_ids[0])) {
+      if (!triplet_count.count(tile_ids[0])) {
         triplet_count.insert({tile_ids[0], 1});
       } else if (triplet_count[tile_ids[0]] == 2) {
         result.AddPoint(2);
@@ -163,7 +166,7 @@ void TripleTriplet::TryMatch(const std::vector<MeldInId>& hand,
     if (meld.GetMeldType() == MeldType::Triplet
         || meld.GetMeldType() == MeldType::ConcealedKong
         || meld.GetMeldType() == MeldType::ExposeKong) {
-      if (triplet_count.count(tile_ids[0])) {
+      if (!triplet_count.count(tile_ids[0])) {
         triplet_count.insert({tile_ids[0], 1});
       } else if (triplet_count[tile_ids[0]] == 2) {
         result.AddPoint(2);
@@ -254,14 +257,14 @@ void SevenPairs::TryMatch(const Hand& hand,
                           MatchResult& result) {
   std::unordered_map<TileId, uint8_t> counts;
   for (auto&& tile : hand.GetHands()) {
-    TileId id = tile->ToId();
-    if (counts.count(id)) {
+    TileId id = tile->GetId();
+    if (!counts.count(id)) {
       counts.insert({id, 1});
     } else {
       counts[id]++;
     }
   }
-  if (counts.count(new_tile_id)) {
+  if (!counts.count(new_tile_id)) {
     counts.insert({new_tile_id, 1});
   } else {
     counts[new_tile_id]++;

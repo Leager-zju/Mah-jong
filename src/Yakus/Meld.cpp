@@ -3,6 +3,7 @@
 #include "Tiles.hpp"
 
 #include <iostream>
+#include <string>
 
 namespace mahjong {
 void Meld::Show() const {
@@ -23,10 +24,16 @@ void Meld::Show() const {
       std::cout << "ConcealedKong: ";
       break;
   }
-  for (auto&& tile : meld_) {
-    std::cout << tile->ToString();
-  }
+  std::cout << ToString();
   std::cout << '\n';
+}
+
+std::string Meld::ToString() const {
+  std::string res;
+  for (auto&& tile : meld_) {
+    res += tile->ToString();
+  }
+  return res;
 }
 
 void MeldInId::Show() const {

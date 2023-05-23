@@ -40,6 +40,7 @@ class Meld {
     meld_.push_back(tile_4);
   }
   void Show() const;
+  std::string ToString() const;
 
   MeldType GetMeldType() const {
     return meld_type_;
@@ -58,7 +59,7 @@ class MeldInId {
  public:
   explicit MeldInId(const Meld& other) : meld_type_(other.GetMeldType()) {
     for (auto tile : other.GetMeld()) {
-      tile_ids_.push_back(tile->ToId());
+      tile_ids_.push_back(tile->GetId());
     }
   }
   // Eyes

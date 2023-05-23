@@ -59,7 +59,7 @@ void TwicePureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
   for (auto&& meld : hand) {
     if (meld.GetMeldType() == MeldType::Sequence) {
       auto&& tile_ids = meld.GetTileId();
-      if (counts.count(tile_ids[0])) {
+      if (!counts.count(tile_ids[0])) {
         counts.insert({tile_ids[0], 1});
       } else {
         counts[tile_ids[0]]++;

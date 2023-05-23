@@ -38,8 +38,8 @@ std::array<Tile, TOTAL> tile_pool = {
 
     Tile(E),   Tile(E),   Tile(E),   Tile(E),   Tile(S),   Tile(S),   Tile(S),
     Tile(S),   Tile(W),   Tile(W),   Tile(W),   Tile(W),   Tile(N),   Tile(N),
-    Tile(N),   Tile(N),   Tile(Z),   Tile(Z),   Tile(Z),   Tile(Z),   Tile(F),
-    Tile(F),   Tile(F),   Tile(F),   Tile(B),   Tile(B),   Tile(B),   Tile(B)};
+    Tile(N),   Tile(N),   Tile(Z),   Tile(Z),   Tile(Z),   Tile(Z),   Tile(B),
+    Tile(B),   Tile(B),   Tile(B),   Tile(F),   Tile(F),   Tile(F),   Tile(F)};
 
 const std::unique_ptr<GlobalTileManager> GlobalTileManager::GLOBAL_TILE_MANAGER
     = std::make_unique<GlobalTileManager>();
@@ -101,7 +101,7 @@ void GlobalTileManager::ShowDiscardPile() const {
 
 void GlobalTileManager::ShowDoraIndicator() const {
   std::cout << "Dora Indicator: ";
-  for (uint16_t i  = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND;
+  for (uint16_t i = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND;
        i          -= 2) {
     if (i >= dora_) {
       std::cout << deck_[i]->ToString() << " ";
@@ -114,7 +114,7 @@ void GlobalTileManager::ShowDoraIndicator() const {
 
 bool GlobalTileManager::IsDora(TileId id) const {
   for (auto i = DORA_TILE_UPPER_BOUND - 1; i >= dora_; i -= 2) {
-    if (id == Tile::Next(deck_[i]->ToId())) {
+    if (id == Tile::Next(deck_[i]->GetId())) {
       return true;
     }
   }
@@ -123,7 +123,7 @@ bool GlobalTileManager::IsDora(TileId id) const {
 
 bool GlobalTileManager::IsInnerDora(TileId id) const {
   for (auto i = DORA_TILE_UPPER_BOUND; i >= inner_dora_; i -= 2) {
-    if (id == Tile::Next(deck_[i]->ToId())) {
+    if (id == Tile::Next(deck_[i]->GetId())) {
       return true;
     }
   }
