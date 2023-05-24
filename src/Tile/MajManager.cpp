@@ -1,5 +1,6 @@
 #include "MajManager.hpp"
 
+#include "Common.hpp"
 #include "Global.hpp"
 #include "GlobalTileManager.hpp"
 #include "Tiles.hpp"
@@ -26,10 +27,12 @@ MajManager::MajManager() {
   std::mt19937 mt(rand());
   std::uniform_int_distribution<size_t> dist(0, 3);
   banker_index_    = dist(mt);
+  cur_index_       = banker_index_;
   my_player_index_ = dist(mt);
-  player_tile_manager_.reserve(4);
-  for (uint16_t i = 0; i < 4; i++) {
-    player_tile_manager_.emplace_back(
+
+  player_.reserve(TOTAL_PLAYERS);
+  for (uint16_t i = 0; i < TOTAL_PLAYERS; i++) {
+    player_.emplace_back(
         std::make_unique<PlayerTileManager>(i, i == my_player_index_));
   }
 }
@@ -41,17 +44,18 @@ const std::unique_ptr<MajManager>& MajManager::GetMajManager() {
 void MajManager::Initial() {
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
   global_tile_manager->Initial();
-  banker_index_ = (banker_index_ + 1) % 4;
+  banker_index_ = NextIndexOf(banker_index_);
+  cur_index_    = banker_index_;
   for (size_t round = 0; round < 3; round++) {
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < TOTAL_PLAYERS; i++) {
       for (size_t j = 0; j < 4; j++) {
-        player_tile_manager_[i]->Draw(global_tile_manager->Pop());
+        PlayerDraw(i, global_tile_manager->Pop());
       }
     }
   }
 
-  for (size_t i = 0; i < 4; i++) {
-    player_tile_manager_[i]->Draw(global_tile_manager->Pop());
+  for (size_t i = 0; i < TOTAL_PLAYERS; i++) {
+    PlayerDraw(i, global_tile_manager->Pop());
   }
 }
 
@@ -64,60 +68,75 @@ void MajManager::Begin() {
 void MajManager::BeginNewRound() {
   Initial();
   ClearAndPrintHeader();
-  size_t index = banker_index_;
 
-  bool self_drawn_win = false;
-  size_t winner_index = UINT16_MAX;
+  uint16_t winner_index = UINT16_MAX;
+
+  bool need_draw        = true;
+  bool kong_before_draw = false;
+  bool self_drawn_win   = false;
+
   MatchResult res;
 
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
-  while (!global_tile_manager->IsEmpty()) {
-    pTile new_tile = global_tile_manager->Pop();
+  while (!global_tile_manager->Empty()) {
+    pTile new_tile = need_draw
+                         ? (kong_before_draw ? global_tile_manager->PopBack()
+                                             : global_tile_manager->Pop())
+                         : nullptr;
 
-    player_tile_manager_[index]->Draw(new_tile);
-    if (index == my_player_index_) {
-      res = player_tile_manager_[index]->TrySelfDrawn(new_tile);
-      if (res.HasResult()) {
-        self_drawn_win = true;
-        winner_index   = my_player_index_;
-        break;
-      }
-      player_tile_manager_[index]->TryKong(new_tile, index);
+    need_draw        = true;
+    kong_before_draw = false;
+
+    res = PlayerDrawAndCheckSelfDrawn(cur_index_, new_tile);
+    if (res.HasResult()) {
+      self_drawn_win = true;
+      winner_index   = my_player_index_;
+      break;
+    }
+    if (player_[cur_index_]->TryKong(new_tile, cur_index_)) {
+      kong_before_draw = true;
+      // RoundChange(cur_index_);
+      continue;
     }
 
-    pTile discard_tile = player_tile_manager_[index]->Discard();
-    std::cout << "Player" << index << " Discard " << discard_tile->ToString()
-              << '\n';
-    bool do_operation = false;
-    if (index != my_player_index_) {
-      res = player_tile_manager_[my_player_index_]->TryWin(discard_tile);
+    pTile discard_tile = PlayerDiscard(cur_index_);
+    std::cout << "Player" << cur_index_ << " Discard "
+              << discard_tile->ToString() << '\n';
+
+    if (cur_index_
+        != my_player_index_) {  // TODO(leager): check every player but not myplayer
+      res = player_[my_player_index_]->TryWin(discard_tile, false);
       if (res.HasResult()) {
         self_drawn_win = false;
         winner_index   = my_player_index_;
         break;
       }
 
-      do_operation = player_tile_manager_[my_player_index_]->TryKong(
-          discard_tile, index);
-      if (!do_operation) {
-        do_operation = player_tile_manager_[my_player_index_]->TryPong(
-            discard_tile, index);
-        if (!do_operation && index == (my_player_index_ + 3) % 4) {
-          do_operation
-              = player_tile_manager_[my_player_index_]->TryChi(discard_tile);
+      if (player_[my_player_index_]->TryKong(discard_tile, cur_index_)) {
+        kong_before_draw = true;
+        RoundChange(my_player_index_);
+        continue;
+      }
+
+      if (player_[my_player_index_]->TryPong(discard_tile, cur_index_)) {
+        need_draw = false;
+        RoundChange(my_player_index_);
+        continue;
+      }
+
+      if (IsPrevIndexOf(cur_index_, my_player_index_)) {
+        if (player_[my_player_index_]->TryChi(discard_tile)) {
+          need_draw = false;
+          RoundChange(my_player_index_);
+          continue;
         }
       }
     }
 
-    if (!do_operation) {
-      global_tile_manager->ReceiveDiscardTile(discard_tile);
-      ClearAndPrintHeader();
-      index = (index + 1) % 4;
-    } else {
-      ClearAndPrintHeader();
-      index = (my_player_index_ + 1) % 4;
-    }
+    PlayerImplementDiscard(cur_index_, discard_tile);
 
+    ClearAndPrintHeader();
+    RoundChange(NextIndexOf(cur_index_));
     std::this_thread::sleep_for(std::chrono::seconds(2));
   }
 
@@ -127,6 +146,32 @@ void MajManager::BeginNewRound() {
     res.ShowResult();
     std::cout << "\n\nPRESS ANY KEY TO CONTINUE...";
     getchar();
+    getchar();
+  }
+}
+
+void MajManager::PlayerDraw(uint16_t index, pTile new_tile) {
+  if (new_tile) {
+    player_[index]->Draw(new_tile);
+  }
+}
+
+MatchResult MajManager::PlayerDrawAndCheckSelfDrawn(uint16_t index,
+                                                    pTile new_tile) {
+  if (new_tile) {
+    PlayerDraw(index, new_tile);
+    return player_[index]->TryWin(new_tile, true);
+  }
+  return {};
+}
+
+pTile MajManager::PlayerDiscard(uint16_t index) {
+  return player_[index]->Discard();
+}
+
+void MajManager::PlayerImplementDiscard(uint16_t index, pTile discard_tile) {
+  if (discard_tile) {
+    player_[index]->ReceiveDiscardTile(discard_tile);
   }
 }
 
@@ -153,24 +198,21 @@ void MajManager::ClearAndPrintHeader() const {
   std::cout << title;
 
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
-  std::cout << "You're" << global::GetColor(my_player_index_) << " Player "
-            << my_player_index_ << "("
-            << global::GetWind(my_player_index_, banker_index_) << ")"
-            << global::ColorOff() << '\n';
-  global_tile_manager->ShowDiscardPile();
   global_tile_manager->ShowDoraIndicator();
   for (size_t i = 0; i < 4; i++) {
-    if (i == my_player_index_) {
-      continue;
-    }
-
     std::cout << global::GetColor(i) << "Player " << i << " "
               << "(" << global::GetWind(i, banker_index_) << ")"
               << "(" << global::GetRelativePosition(i, my_player_index_) << ")"
-              << global::ColorOff();
+              << global::ColorOff() << '\t';
 
-    player_tile_manager_[i]->ShowExpose();
+    player_[i]->ShowDiscard();
+
+    std::cout << " [Expose] ";
+    player_[i]->ShowExpose();
+    std::cout << '\n';
   }
-  player_tile_manager_[my_player_index_]->ShowHand();
+
+  std::cout << "Your Hands: ";
+  player_[my_player_index_]->ShowHand();
 }
 };  // namespace mahjong

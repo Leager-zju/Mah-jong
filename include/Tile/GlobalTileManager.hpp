@@ -14,13 +14,16 @@ class GlobalTileManager {
   static const std::unique_ptr<GlobalTileManager>& GetTileManager();
   void Initial();
   pTile Pop();
-  void ReceiveDiscardTile(pTile discard_tile);
+  pTile PopBack();
+  
   void ShowDeck() const;
-  void ShowDiscardPile() const;
   void ShowDoraIndicator() const;
 
-  bool IsEmpty() const {
+  bool Empty() const {
     return head_ > TILE_UPPER_BOUND;
+  }
+  bool DeadEmpty() const {
+    return tail_ < REPLACEMENT_TILE_LOWER_BOUND;
   }
   bool IsDora(TileId id) const;
   bool IsInnerDora(TileId id) const;
@@ -40,10 +43,5 @@ class GlobalTileManager {
    * 王牌  | 里宝牌指示牌 123 125 127 129 131 | 岭上牌 133 135 |
    */
   std::vector<pTile> deck_;
-
-  /*
-   * 牌河
-   */
-  std::vector<pTile> disacrd_pile_;
 };
 };  // namespace mahjong

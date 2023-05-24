@@ -74,11 +74,11 @@ std::array<const char*, 47> yaku_in_string = {
 void MatchResult::ShowResult() const {
   std::cout << '\n';
   for (YakuType yaku : yakus_matched_) {
-    std::cout << YakusMatcher::Yaku2String(yaku);
+    std::cout << mahjong::yakus_matcher::Yaku2String(yaku);
   }
   if (yakuman_) {
     std::cout << "------------------------------------------------\n";
-    std::cout << "TOTAL                    ...           " << yakuman_
+    std::cout << "TOTAL_TILES                    ...           " << yakuman_
               << " YAKUMAN\n";
   } else if (points_) {
     if (dora_) {
@@ -91,7 +91,7 @@ void MatchResult::ShowResult() const {
     }
     std::cout << "------------------------------------------------\n";
     auto total_point = points_ + dora_ + inner_dora_;
-    std::cout << "TOTAL                    ...             " << total_point
+    std::cout << "TOTAL_TILES                    ...             " << total_point
               << " Han\n";
     if (total_point >= 13) {
       std::cout << "KAZOE YAKUMAN!\n";
@@ -108,11 +108,11 @@ void MatchResult::ShowResult() const {
   std::cout << '\n';
 }
 
-MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
-                                          const Expose& expose,
-                                          pTile new_tile,
-                                          bool Riichi,
-                                          bool self_drawn) {
+MatchResult mahjong::yakus_matcher::TryAllYakuMatch(const Hand& hand,
+                                           const Expose& expose,
+                                           pTile new_tile,
+                                           bool Riichi,
+                                           bool self_drawn) {
   MatchResult result{};
   std::vector<MeldInId> hand_melds_in_id;
   std::vector<MeldInId> expose_melds_in_id;
@@ -187,92 +187,94 @@ MatchResult YakusMatcher::TryAllYakuMatch(const Hand& hand,
   return result;
 }
 
-void YakusMatcher::BuildMelds(const Hand& hand,
-                              const Expose& expose,
-                              pTile new_tile,
-                              std::vector<MeldInId>& hand_melds_in_id,
-                              std::vector<MeldInId>& expose_melds_in_id) {
-  // make melds
-  std::unordered_map<TileId, size_t> table;
-  for (auto&& tile : hand.GetHands()) {
-    TileId id   = tile->GetId();
-    auto&& iter = table.find(id);
-    if (iter == table.end()) {
-      table.emplace(id, 1);
+namespace yakus_matcher {
+  void BuildMelds(const Hand& hand,
+                  const Expose& expose,
+                  pTile new_tile,
+                  std::vector<MeldInId>& hand_melds_in_id,
+                  std::vector<MeldInId>& expose_melds_in_id) {
+    // make melds
+    std::unordered_map<TileId, size_t> table;
+    for (auto&& tile : hand.GetHands()) {
+      TileId id   = tile->GetId();
+      auto&& iter = table.find(id);
+      if (iter == table.end()) {
+        table.emplace(id, 1);
+      } else {
+        iter->second++;
+      }
+    }
+    TileId new_tile_id = new_tile->GetId();
+    auto&& new_iter    = table.find(new_tile_id);
+    if (new_iter == table.end()) {
+      table.emplace(new_tile_id, 1);
     } else {
-      iter->second++;
+      new_iter->second++;
     }
-  }
-  TileId new_tile_id = new_tile->GetId();
-  auto&& new_iter    = table.find(new_tile_id);
-  if (new_iter == table.end()) {
-    table.emplace(new_tile_id, 1);
-  } else {
-    new_iter->second++;
-  }
-  for (auto&& meld : expose.GetExposes()) {
-    expose_melds_in_id.emplace_back(meld);
-  }
+    for (auto&& meld : expose.GetExposes()) {
+      expose_melds_in_id.emplace_back(meld);
+    }
 
-  for (auto&& iter = table.begin(); iter != table.end(); iter++) {
-    if (iter->second >= 2) {
-      iter->second -= 2;
-      hand_melds_in_id.emplace_back(MeldType::Eyes, iter->first, iter->first);
-      if (FindMeld(table, hand_melds_in_id)) {
-        break;
+    for (auto&& iter = table.begin(); iter != table.end(); iter++) {
+      if (iter->second >= 2) {
+        iter->second -= 2;
+        hand_melds_in_id.emplace_back(MeldType::Eyes, iter->first, iter->first);
+        if (FindMeld(table, hand_melds_in_id)) {
+          break;
+        }
+        hand_melds_in_id.pop_back();
+        iter->second += 2;
       }
-      hand_melds_in_id.pop_back();
-      iter->second += 2;
-    }
-  }
-}
-
-bool YakusMatcher::FindMeld(std::unordered_map<TileId, size_t>& table,
-                            std::vector<MeldInId>& melds) {
-  bool clear = true;
-  for (auto&& iter = table.begin(); iter != table.end(); iter++) {
-    if (iter->second) {
-      clear = false;
-    }
-    if (iter->second >= 3) {
-      iter->second -= 3;
-      melds.emplace_back(
-          MeldType::Triplet, iter->first, iter->first, iter->first);
-      if (FindMeld(table, melds)) {
-        return true;
-      }
-      melds.pop_back();
-      iter->second += 3;
-    }
-
-    if (iter->second >= 1) {
-      auto&& iter_plus1 = table.find(static_cast<TileId>(iter->first + 1));
-      auto&& iter_plus2 = table.find(static_cast<TileId>(iter->first + 2));
-      if (iter_plus1 == table.end() || iter_plus1->second == 0
-          || iter_plus2 == table.end() || iter_plus2->second == 0) {
-        continue;
-      }
-      iter->second--;
-      iter_plus1->second--;
-      iter_plus2->second--;
-      melds.emplace_back(MeldType::Sequence,
-                         iter->first,
-                         iter_plus1->first,
-                         iter_plus2->first);
-      if (FindMeld(table, melds)) {
-        return true;
-      }
-      melds.pop_back();
-      iter->second++;
-      iter_plus1->second++;
-      iter_plus2->second++;
     }
   }
 
-  return clear;
-}
+  bool FindMeld(std::unordered_map<TileId, size_t>& table,
+                std::vector<MeldInId>& melds) {
+    bool clear = true;
+    for (auto&& iter = table.begin(); iter != table.end(); iter++) {
+      if (iter->second) {
+        clear = false;
+      }
+      if (iter->second >= 3) {
+        iter->second -= 3;
+        melds.emplace_back(
+            MeldType::Triplet, iter->first, iter->first, iter->first);
+        if (FindMeld(table, melds)) {
+          return true;
+        }
+        melds.pop_back();
+        iter->second += 3;
+      }
 
-const char* YakusMatcher::Yaku2String(YakuType yaku) {
-  return yaku_in_string.at(static_cast<const size_t>(yaku));
-}
+      if (iter->second >= 1) {
+        auto&& iter_plus1 = table.find(static_cast<TileId>(iter->first + 1));
+        auto&& iter_plus2 = table.find(static_cast<TileId>(iter->first + 2));
+        if (iter_plus1 == table.end() || iter_plus1->second == 0
+            || iter_plus2 == table.end() || iter_plus2->second == 0) {
+          continue;
+        }
+        iter->second--;
+        iter_plus1->second--;
+        iter_plus2->second--;
+        melds.emplace_back(MeldType::Sequence,
+                           iter->first,
+                           iter_plus1->first,
+                           iter_plus2->first);
+        if (FindMeld(table, melds)) {
+          return true;
+        }
+        melds.pop_back();
+        iter->second++;
+        iter_plus1->second++;
+        iter_plus2->second++;
+      }
+    }
+
+    return clear;
+  }
+
+  const char* Yaku2String(YakuType yaku) {
+    return yaku_in_string.at(static_cast<const size_t>(yaku));
+  }
+};  // namespace yakus_matcher
 };  // namespace mahjong

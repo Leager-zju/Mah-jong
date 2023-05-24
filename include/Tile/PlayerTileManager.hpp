@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 namespace mahjong {
 struct MatchResult;
@@ -19,17 +20,21 @@ class PlayerTileManager {
         player_index_(player_index),
         is_my_player_(is_my_player) {}
   void Draw(pTile new_tile);
-  MatchResult TrySelfDrawn(pTile new_tile);
+  void ReceiveDiscardTile(pTile discard_tile);
+  
+  MatchResult TryWin(pTile new_tile, bool self_drawn);
 
   bool TryChi(pTile new_tile);
   bool TryPong(pTile new_tile, uint16_t discard_player_index);
   bool TryKong(pTile new_tile, uint16_t discard_player_index);
-  MatchResult TryWin(pTile new_tile);
+  
 
   pTile Discard() const;
 
   void ShowHand() const;
   void ShowExpose() const;
+  void ShowDiscard() const;
+
   const Hand& GetHand() const {
     return *hand_;
   }
@@ -40,6 +45,7 @@ class PlayerTileManager {
  private:
   std::unique_ptr<Hand> hand_;
   std::unique_ptr<Expose> expose_;
+  std::vector<pTile> discards_;
 
   uint16_t player_index_;
   bool is_my_player_;

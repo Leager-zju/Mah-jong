@@ -10,7 +10,7 @@
 using mahjong::Expose;
 using mahjong::Hand;
 using mahjong::Tile;
-using mahjong::YakusMatcher;
+using mahjong::yakus_matcher::TryAllYakuMatch;
 
 TEST(Yaku, WhiteDragonYaku) {
   Hand hand;
@@ -35,7 +35,7 @@ TEST(Yaku, WhiteDragonYaku) {
   Tile new_tile = Tile(mahjong::F);
 
   auto&& res
-      = YakusMatcher::TryAllYakuMatch(hand, expose, &new_tile, false, false);
+      = TryAllYakuMatch(hand, expose, &new_tile, false, false);
   EXPECT_EQ(res.GetPoint(), 1);
   res.ShowResult();
 }
@@ -62,7 +62,7 @@ TEST(Yaku, PureNineGates) {
   }
   Tile new_tile = Tile(mahjong::_5m);
   auto&& res
-      = YakusMatcher::TryAllYakuMatch(hand, expose, &new_tile, false, false);
+      = mahjong::yakus_matcher::TryAllYakuMatch(hand, expose, &new_tile, false, false);
   EXPECT_EQ(res.GetYakuman(), 2);
   res.ShowResult();
 }

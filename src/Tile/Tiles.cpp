@@ -69,9 +69,9 @@ std::string Tile::TransformId2string(TileId id) {
     case 7:
       return "Z";
     case 8:
-      return "F";
-    case 9:
       return "B";
+    case 9:
+      return "F";
     default:
       return "";
   }

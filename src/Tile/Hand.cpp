@@ -57,44 +57,9 @@ pTile Hand::RandomDiscard() {
 }
 
 void Hand::Show() const {
-  std::cout << "Hands: ";
   for (auto&& tile : in_hand_) {
     std::cout << tile->ToString() << " ";
   }
   std::cout << '\n';
 }
-
-// void Hand::check_concealed_kong(int& start_index) {
-//   uint16_t id = in_hand_[0]->GetId();
-//   uint16_t count = 1;
-//   for (auto&& i = 1; i < in_hand_.size(); i++) {
-//     if (in_hand_[i]->GetId() == id) {
-//       if (++count == 4) {
-//         start_index = i - 3;
-//         return;
-//       }
-//     } else {
-//       id = in_hand_[i]->GetId();
-//       count = 1;
-//     }
-//   }
-// }
-
-// bool Hand::try_concealed_kong(const int start_index) {
-//   char response;
-//   std::cout << "Kong " << in_hand_[start_index]->ToString() << " ?[y/n]";
-//   std::cin >> response;
-//   assert(response == 'y' || response == 'n');
-//   return response == 'y';
-// }
-
-// std::vector<pTile> Hand::do_concealed_kong(const int start_index) {
-//   std::vector<pTile> res;
-//   res.reserve(4);
-//   for (int i = 0; i < 4; i++) {
-//     res.emplace_back(in_hand_[start_index]);
-//     in_hand_.erase(in_hand_.begin() + start_index);
-//   }
-//   return res;
-// }
 };  // namespace mahjong

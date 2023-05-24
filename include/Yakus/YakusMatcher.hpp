@@ -66,21 +66,20 @@ class MatchResult {
   uint16_t inner_dora_ = 0;
 };
 
-class YakusMatcher {
- public:
-  static MatchResult TryAllYakuMatch(const Hand& hand,
-                                     const Expose& expose,
-                                     pTile new_tile,
-                                     bool Riichi,
-                                     bool self_drawn);
-  static void BuildMelds(const Hand& hand,
-                         const Expose& expose,
-                         pTile new_tile,
-                         std::vector<MeldInId>& hand_melds_in_id,
-                         std::vector<MeldInId>& expose_melds_in_id);
-  static bool FindMeld(std::unordered_map<TileId, size_t>& table,
-                       std::vector<MeldInId>& melds);
+namespace yakus_matcher {
+  MatchResult TryAllYakuMatch(const Hand& hand,
+                              const Expose& expose,
+                              pTile new_tile,
+                              bool Riichi,
+                              bool self_drawn);
+  void BuildMelds(const Hand& hand,
+                  const Expose& expose,
+                  pTile new_tile,
+                  std::vector<MeldInId>& hand_melds_in_id,
+                  std::vector<MeldInId>& expose_melds_in_id);
+  bool FindMeld(std::unordered_map<TileId, size_t>& table,
+                std::vector<MeldInId>& melds);
 
-  static const char* Yaku2String(YakuType yaku);
-};
+  const char* Yaku2String(YakuType yaku);
+};  // namespace yakus_matcher
 };  // namespace mahjong

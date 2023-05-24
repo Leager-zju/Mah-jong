@@ -4,7 +4,6 @@
 
 namespace mahjong {
 void Expose::Show() const {
-  std::cout << "Expose:";
   for (auto&& meld : in_expose_) {
     meld.Show();
   }

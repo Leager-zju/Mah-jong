@@ -5,7 +5,7 @@
 #include <cstdint>
 
 namespace mahjong {
-const uint16_t TOTAL = 136;
+const uint16_t TOTAL_TILES = 136;
 
 const uint16_t TILE_LOWER_BOUND             = 0;
 const uint16_t TILE_UPPER_BOUND             = 121;
@@ -17,6 +17,8 @@ const uint16_t REPLACEMENT_TILE_UPPER_BOUND = 135;
 const uint16_t MAN = 0;
 const uint16_t PIN = 10;
 const uint16_t SOU = 20;
+
+const uint16_t TOTAL_PLAYERS = 4;
 
 enum class YakuType : uint8_t {
   // 一番

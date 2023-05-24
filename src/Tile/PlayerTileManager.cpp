@@ -1,8 +1,8 @@
 #include "PlayerTileManager.hpp"
 
-
 #include "Common.hpp"
 #include "DoraYaku.hpp"
+#include "GlobalTileManager.hpp"
 #include "Meld.hpp"
 #include "Tiles.hpp"
 #include "YakusMatcher.hpp"
@@ -10,11 +10,11 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <iostream>
 #include <optional>
 #include <unordered_set>
 #include <vector>
-
 
 namespace mahjong {
 void PlayerTileManager::Draw(pTile new_tile) {
@@ -25,15 +25,24 @@ void PlayerTileManager::Draw(pTile new_tile) {
   hand_->Draw(new_tile);
 }
 
+void PlayerTileManager::ReceiveDiscardTile(pTile discard_tile) {
+  discards_.push_back(discard_tile);
+}
+
 pTile PlayerTileManager::Discard() const {
   pTile discard_tile = nullptr;
   if (is_my_player_) {
     std::string discard_string;
-    std::cout << "Input the tile you want to discard(eg. 1m, W): ";
-    std::cin >> discard_string;
+    char input = '0';
+    std::cout << "Input the tile you want to discard: ";
+    while ((input = static_cast<char>(getchar())) != '\n') {
+      discard_string.push_back(input);
+    }
     while (!hand_->Discard(discard_string, discard_tile)) {
-      std::cout << "Wrong Input, please try again(eg. 1m, W): ";
-      std::cin >> discard_string;
+      std::cout << "Wrong Input, please try again: ";
+      while ((input = static_cast<char>(getchar())) != '\n') {
+        discard_string.push_back(input);
+      }
     }
   } else {
     discard_tile = hand_->RandomDiscard();
@@ -41,23 +50,24 @@ pTile PlayerTileManager::Discard() const {
   return discard_tile;
 }
 
-MatchResult PlayerTileManager::TrySelfDrawn(pTile new_tile) {
-  if (MatchResult res = YakusMatcher::TryAllYakuMatch(
-          *hand_, *expose_, new_tile, in_riichi_, true);
-      res.HasResult()) {
-    char option = 0;
-    std::cout << "\nYou Can Self-Drawn, Do you? [y/n]";
-    std::cin >> option;
-    while (option != 'y' && option != 'n') {
-      std::cout << "\nWrong Input, Please Try Again! [y/n]";
-      std::cin >> option;
-    }
-    if (option == 'y') {
-      Dora::TryMatch(*hand_, *expose_, in_riichi_, res);
-      return res;
+MatchResult PlayerTileManager::TryWin(pTile new_tile, bool self_drawn) {
+  MatchResult res = mahjong::yakus_matcher::TryAllYakuMatch(
+      *hand_, *expose_, new_tile, in_riichi_, self_drawn);
+  if (res.HasResult()) {
+    if (is_my_player_) {
+      char option = 'n';
+      std::cout << "\nYou Can Win, Do you? [y/n] ";
+      option = static_cast<char>(getchar());
+      while (option != 'y' && option != 'n') {
+        std::cout << "Wrong Input, Please Try Again. [y/n] ";
+        option = static_cast<char>(getchar());
+      }
+      if (option == 'y') {
+        Dora::TryMatch(*hand_, *expose_, in_riichi_, res);
+      }
     }
   }
-  return {};
+  return res;
 }
 
 bool PlayerTileManager::TryChi(pTile new_tile) {
@@ -120,11 +130,11 @@ bool PlayerTileManager::TryChi(pTile new_tile) {
   if (possible_melds.size() >= 3) {
     std::cout << "3. " << possible_melds[2].ToString() << '\n';
   }
-  std::cout << "Choose A Meld You Want To Chi, 0 for cancel. ";
-  std::cin >> select_index;
+  std::cout << "Choose A Meld You Want To Chi, [0] for cancel. ";
+  select_index = static_cast<char>(getchar()) - '0';
   while (select_index > possible_melds.size()) {
     std::cout << "Wrong Input, Please Try Again. ";
-    std::cin >> select_index;
+    select_index = static_cast<char>(getchar()) - '0';
   }
 
   if (select_index == 0) {
@@ -161,11 +171,11 @@ bool PlayerTileManager::TryPong(pTile new_tile, uint16_t discard_player_index) {
   }
 
   char option = 'n';
-  std::cout << "You Can Do \"Pong\" Operation. [y/n]";
-  std::cin >> option;
+  std::cout << "You Can Do \"Pong\" Operation. [y/n] ";
+  option = static_cast<char>(getchar());
   while (option != 'y' && option != 'n') {
-    std::cout << "Wrong Input, Please Try Again. [y/n]";
-    std::cin >> option;
+    std::cout << "Wrong Input, Please Try Again. [y/n] ";
+    option = static_cast<char>(getchar());
   }
   if (option == 'n') {
     return false;
@@ -192,6 +202,10 @@ bool PlayerTileManager::TryPong(pTile new_tile, uint16_t discard_player_index) {
 }
 
 bool PlayerTileManager::TryKong(pTile new_tile, uint16_t discard_player_index) {
+  if (GlobalTileManager::GetTileManager()->DeadEmpty()) {
+    return false;
+  }
+
   TileId new_tile_id = new_tile->GetId();
 
   auto hands = hand_->GetHands();
@@ -223,11 +237,11 @@ bool PlayerTileManager::TryKong(pTile new_tile, uint16_t discard_player_index) {
   }
 
   char option = 'n';
-  std::cout << "You Can Do \"Kong\" Operation. [y/n]";
-  std::cin >> option;
+  std::cout << "You Can Do \"Kong\" Operation. [y/n] ";
+  option = static_cast<char>(getchar());
   while (option != 'y' && option != 'n') {
-    std::cout << "Wrong Input, Please Try Again. [y/n]";
-    std::cin >> option;
+    std::cout << "Wrong Input, Please Try Again. [y/n] ";
+    option = static_cast<char>(getchar());
   }
   if (option == 'n') {
     return false;
@@ -264,31 +278,18 @@ bool PlayerTileManager::TryKong(pTile new_tile, uint16_t discard_player_index) {
   return true;
 }
 
-MatchResult PlayerTileManager::TryWin(pTile new_tile) {
-  if (MatchResult res = YakusMatcher::TryAllYakuMatch(
-          *hand_, *expose_, new_tile, in_riichi_, false);
-      res.HasResult()) {
-    char option = 0;
-    std::cout << "\nYou Can Win, Do you? [y/n]";
-    std::cin >> option;
-    while (option != 'y' && option != 'n') {
-      std::cout << "Wrong Input, Please Try Again. [y/n]";
-      std::cin >> option;
-    }
-    if (option == 'y') {
-      Dora::TryMatch(*hand_, *expose_, in_riichi_, res);
-      return res;
-    }
-  }
-  return {};
-}
-
 void PlayerTileManager::ShowHand() const {
-  std::cout << "Your ";
   hand_->Show();
 }
 
 void PlayerTileManager::ShowExpose() const {
   expose_->Show();
+}
+
+void PlayerTileManager::ShowDiscard() const {
+  for (auto&& tile : discards_) {
+    std::cout << tile->ToString() << " ";
+  }
+  std::cout << '\n';
 }
 };  // namespace mahjong

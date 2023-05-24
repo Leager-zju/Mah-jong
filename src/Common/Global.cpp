@@ -51,6 +51,8 @@ namespace global {
   const char* GetRelativePosition(uint16_t other_index, uint16_t my_index) {
     uint16_t diff = (other_index - my_index + 4) % 4;
     switch (diff) {
+      case 0:
+        return "You";
       case 1:
         return "下家";
       case 2:

@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace mahjong {
-std::array<Tile, TOTAL> tile_pool = {
+std::array<Tile, TOTAL_TILES> tile_pool = {
     Tile(_1m), Tile(_1m), Tile(_1m), Tile(_1m), Tile(_2m), Tile(_2m), Tile(_2m),
     Tile(_2m), Tile(_3m), Tile(_3m), Tile(_3m), Tile(_3m), Tile(_4m), Tile(_4m),
     Tile(_4m), Tile(_4m), Tile(_5m), Tile(_5m), Tile(_5m), Tile(_5m), Tile(_6m),
@@ -45,8 +45,7 @@ const std::unique_ptr<GlobalTileManager> GlobalTileManager::GLOBAL_TILE_MANAGER
     = std::make_unique<GlobalTileManager>();
 
 GlobalTileManager::GlobalTileManager() {
-  deck_.resize(TOTAL);
-  disacrd_pile_.resize(TOTAL);
+  deck_.resize(TOTAL_TILES);
 }
 
 const std::unique_ptr<GlobalTileManager>& GlobalTileManager::GetTileManager() {
@@ -54,9 +53,6 @@ const std::unique_ptr<GlobalTileManager>& GlobalTileManager::GetTileManager() {
 }
 
 void GlobalTileManager::Initial() {
-  // 清理所有 pTile
-  disacrd_pile_.clear();
-
   int index = 0;
   for (auto&& tile : tile_pool) {
     tile.Initial();
@@ -66,15 +62,25 @@ void GlobalTileManager::Initial() {
 }
 
 pTile GlobalTileManager::Pop() {
-  if (head_ > TILE_UPPER_BOUND) {
+  if (Empty()) {
     return nullptr;
   }
 
   return deck_[head_++];
 }
 
-void GlobalTileManager::ReceiveDiscardTile(pTile discard_tile) {
-  disacrd_pile_.emplace_back(discard_tile);
+pTile GlobalTileManager::PopBack() {
+  if (DeadEmpty()) {
+    return nullptr;
+  }
+
+  pTile res = deck_[tail_];
+  if (tail_ % 2) {
+    tail_ -= 3;
+  } else {
+    tail_ ++;
+  }
+  return res;
 }
 
 void GlobalTileManager::Shuffle() {
@@ -91,25 +97,19 @@ void GlobalTileManager::ShowDeck() const {
   std::cout << '\n';
 }
 
-void GlobalTileManager::ShowDiscardPile() const {
-  std::cout << "Discard Pile: ";
-  for (auto&& tile : disacrd_pile_) {
-    std::cout << tile->ToString() << " ";
-  }
-  std::cout << '\n';
-}
-
 void GlobalTileManager::ShowDoraIndicator() const {
-  std::cout << "Dora Indicator: ";
+  std::cout << "┌────────────────┐ \n";
+  std::cout << "│ Dora Indicator │";
   for (uint16_t i = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND;
        i          -= 2) {
     if (i >= dora_) {
-      std::cout << deck_[i]->ToString() << " ";
+      std::cout << "  " << deck_[i]->ToString();
     } else {
-      std::cout << "\033[31m \033[0m ";
+      std::cout << "  \033[47m \033[0m";
     }
   }
   std::cout << '\n';
+  std::cout << "└────────────────┘\n\n";
 }
 
 bool GlobalTileManager::IsDora(TileId id) const {

@@ -23,7 +23,7 @@ void Riichi::TryMatch(MatchResult& result) {
 
 void UnderTheSeaOrRiver::TryMatch(bool self_drawn, MatchResult& result) {
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
-  if (global_tile_manager->IsEmpty()) {
+  if (global_tile_manager->Empty()) {
     result.AddPoint(1);
     result.AddYaku(self_drawn ? YakuType::UnderTheSea
                               : YakuType::UnderTheRiver);
