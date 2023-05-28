@@ -1,13 +1,11 @@
 #include "Tiles.hpp"
 
 #include "Common.hpp"
-#include "global.hpp"
+#include "Global.hpp"
 
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <memory>
-#include <string>
 
 namespace mahjong {
 TileId Tile::TransformString2id(const std::string& str) {
@@ -95,5 +93,42 @@ TileId Tile::Next(TileId id) {
   }
 
   return id == F ? Z : static_cast<TileId>(id + 10);
+}
+
+uint16_t Tile::Difference(TileId lhs, TileId rhs) {
+  if (lhs / 10 == rhs / 10) {
+    return std::abs(rhs - lhs);
+  }
+  return UINT16_MAX;
+}
+
+std::set<TileId> Tile::FindMeldComplement(TileId lhs, TileId rhs) {
+  // assert rhs > lhs
+  if (lhs > rhs) {
+    return FindMeldComplement(rhs, lhs);
+  }
+
+  auto diff = Difference(lhs, rhs);
+
+  if (diff > 2) {
+    return {};
+  }
+
+  if (diff == 1) {
+    std::set<TileId> res;
+    if (lhs % 10 != 1) {
+      res.insert(static_cast<TileId>(lhs - 1));
+    }
+    if (rhs % 10 != 9) {
+      res.insert(static_cast<TileId>(rhs + 1));
+    }
+    return res;
+  }
+
+  if (diff == 2) {
+    return {static_cast<TileId>(lhs + 1)};
+  }
+
+  return {lhs};
 }
 };  // namespace mahjong

@@ -7,13 +7,13 @@ namespace mahjong {
 class Expose;
 class Hand;
 class MeldInId;
-struct MatchResult;
+struct WinningResult;
 
 class Dora {
  public:
   static void TryMatch(const Hand& hand,
                        const Expose& expose,
                        bool Riichi,
-                       MatchResult& result);
+                       WinningResult& result);
 };
 };  // namespace mahjong

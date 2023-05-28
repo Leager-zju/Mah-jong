@@ -2,13 +2,13 @@
 
 #include "Common.hpp"
 #include "PlayerTileManager.hpp"
-#include "Tiles.hpp"
 
 #include <cstdint>
 #include <memory>
 
 namespace mahjong {
-struct MatchResult;
+struct WinningResult;
+using pTile = class Tile*;
 
 class MajManager {
  public:
@@ -25,10 +25,15 @@ class MajManager {
   void Begin();
   void BeginNewRound();
   void PlayerDraw(uint16_t index, pTile new_tile);
-  MatchResult PlayerDrawAndCheckSelfDrawn(uint16_t index, pTile new_tile);
-  pTile PlayerDiscard(uint16_t index);
+  WinningResult PlayerDrawAndCheckSelfDrawn(uint16_t index, pTile new_tile);
+  void PlayerTryRiichi(uint16_t index, pTile& discard_tile);
+  void PlayerDiscard(uint16_t index, pTile& discard_tile);
   void PlayerImplementDiscard(uint16_t index, pTile discard_tile);
 
+  static void ClearAndPrintTitle();
+  static bool IsValidPlayerIndex(uint16_t index) {
+    return index >= 0 && index <= 3;
+  }
   void ClearAndPrintHeader() const;
 
   void RoundChange(uint16_t next_player_index) {
@@ -44,9 +49,18 @@ class MajManager {
     return seat_wind_;
   }
 
+  // !!! TEST ONLY !!!
+  void SetBankerIndex(uint16_t index) {
+    banker_index_ = index;
+  }
+  // !!! TEST ONLY !!!
+  void SetMyPlayerIndex(uint16_t index) {
+    my_player_index_ = index;
+  }
+
  private:
   static const std::unique_ptr<MajManager> GLOBAL_MAJ_MANAGER;
-  std::vector<std::unique_ptr<PlayerTileManager>> player_;
+  std::vector<std::unique_ptr<PlayerTileManager>> players_;
 
   uint16_t cur_index_;
   uint16_t banker_index_;

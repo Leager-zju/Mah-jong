@@ -1,20 +1,21 @@
 #pragma once
 
 #include "Common.hpp"
-#include "Tiles.hpp"
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mahjong {
 class Expose;
 class Hand;
 class MeldInId;
+using pTile = class Tile*;
 
-class MatchResult {
+class WinningResult {
  public:
-  MatchResult& WithWinningTileId(TileId id) {
+  WinningResult& WithWinningTileId(TileId id) {
     winning_tile_id_ = id;
     return *this;
   }
@@ -67,11 +68,11 @@ class MatchResult {
 };
 
 namespace yakus_matcher {
-  MatchResult TryAllYakuMatch(const Hand& hand,
-                              const Expose& expose,
-                              pTile new_tile,
-                              bool Riichi,
-                              bool self_drawn);
+  WinningResult TryAllYakuMatch(const Hand& hand,
+                                const Expose& expose,
+                                pTile new_tile,
+                                bool Riichi,
+                                bool self_drawn);
   void BuildMelds(const Hand& hand,
                   const Expose& expose,
                   pTile new_tile,

@@ -53,9 +53,15 @@ const std::unique_ptr<GlobalTileManager>& GlobalTileManager::GetTileManager() {
 }
 
 void GlobalTileManager::Initial() {
-  int index = 0;
+  head_       = TILE_LOWER_BOUND;
+  tail_       = REPLACEMENT_TILE_UPPER_BOUND - 1;
+  dora_       = DORA_TILE_UPPER_BOUND - 1;
+  inner_dora_ = DORA_TILE_UPPER_BOUND;
+
+  int index = TILE_LOWER_BOUND;
   for (auto&& tile : tile_pool) {
     tile.Initial();
+    head_          = 0;
     deck_[index++] = &tile;
   }
   Shuffle();
@@ -78,7 +84,7 @@ pTile GlobalTileManager::PopBack() {
   if (tail_ % 2) {
     tail_ -= 3;
   } else {
-    tail_ ++;
+    tail_++;
   }
   return res;
 }
@@ -100,7 +106,19 @@ void GlobalTileManager::ShowDeck() const {
 void GlobalTileManager::ShowDoraIndicator() const {
   std::cout << "┌────────────────┐ \n";
   std::cout << "│ Dora Indicator │";
-  for (uint16_t i = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND;
+  ShowDora();
+  ShowRemain();
+  std::cout << '\n';
+  std::cout << "└────────────────┘\n\n";
+}
+
+void GlobalTileManager::ShowRemain() const {
+  std::cout << "\t\t";
+  std::cout << "余 " << TILE_UPPER_BOUND - head_ + 1 << " 张";
+}
+
+void GlobalTileManager::ShowDora() const {
+  for (uint16_t i  = DORA_TILE_UPPER_BOUND - 1; i >= DORA_TILE_LOWER_BOUND;
        i          -= 2) {
     if (i >= dora_) {
       std::cout << "  " << deck_[i]->ToString();
@@ -108,8 +126,17 @@ void GlobalTileManager::ShowDoraIndicator() const {
       std::cout << "  \033[47m \033[0m";
     }
   }
-  std::cout << '\n';
-  std::cout << "└────────────────┘\n\n";
+}
+
+void GlobalTileManager::ShowInnerDora(bool in_riichi) const {
+  for (uint16_t i  = DORA_TILE_UPPER_BOUND; i >= DORA_TILE_LOWER_BOUND;
+       i          -= 2) {
+    if (i >= dora_ && in_riichi) {
+      std::cout << "  " << deck_[i]->ToString();
+    } else {
+      std::cout << "  \033[47m \033[0m";
+    }
+  }
 }
 
 bool GlobalTileManager::IsDora(TileId id) const {

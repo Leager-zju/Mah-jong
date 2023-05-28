@@ -71,14 +71,14 @@ std::array<const char*, 47> yaku_in_string = {
     "BigFourWinds !!!\n",
 };
 
-void MatchResult::ShowResult() const {
+void WinningResult::ShowResult() const {
   std::cout << '\n';
   for (YakuType yaku : yakus_matched_) {
-    std::cout << mahjong::yakus_matcher::Yaku2String(yaku);
+    std::cout << yakus_matcher::Yaku2String(yaku);
   }
   if (yakuman_) {
     std::cout << "------------------------------------------------\n";
-    std::cout << "TOTAL_TILES                    ...           " << yakuman_
+    std::cout << "TOTAL_TILES              ...           " << yakuman_
               << " YAKUMAN\n";
   } else if (points_) {
     if (dora_) {
@@ -91,8 +91,8 @@ void MatchResult::ShowResult() const {
     }
     std::cout << "------------------------------------------------\n";
     auto total_point = points_ + dora_ + inner_dora_;
-    std::cout << "TOTAL_TILES                    ...             " << total_point
-              << " Han\n";
+    std::cout << "TOTAL_TILES              ...             "
+              << total_point << " Han\n";
     if (total_point >= 13) {
       std::cout << "KAZOE YAKUMAN!\n";
     } else if (total_point >= 11) {
@@ -108,12 +108,15 @@ void MatchResult::ShowResult() const {
   std::cout << '\n';
 }
 
-MatchResult mahjong::yakus_matcher::TryAllYakuMatch(const Hand& hand,
-                                           const Expose& expose,
-                                           pTile new_tile,
-                                           bool Riichi,
-                                           bool self_drawn) {
-  MatchResult result{};
+WinningResult yakus_matcher::TryAllYakuMatch(const Hand& hand,
+                                             const Expose& expose,
+                                             pTile new_tile,
+                                             bool Riichi,
+                                             bool self_drawn) {
+  if (!new_tile) {
+    return {};
+  }
+  WinningResult result{};
   std::vector<MeldInId> hand_melds_in_id;
   std::vector<MeldInId> expose_melds_in_id;
   hand_melds_in_id.reserve(5);
@@ -171,7 +174,7 @@ MatchResult mahjong::yakus_matcher::TryAllYakuMatch(const Hand& hand,
   UnderTheSeaOrRiver::TryMatch(self_drawn, result);
   Wind::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
   Dragon::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
-
+  AllSimple::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
   OutsideHand::TryMatch(
       hand_melds_in_id, expose_melds_in_id, menzenchin, result);
   PureStraight::TryMatch(
@@ -179,6 +182,7 @@ MatchResult mahjong::yakus_matcher::TryAllYakuMatch(const Hand& hand,
   MixedTripleSequence::TryMatch(
       hand_melds_in_id, expose_melds_in_id, menzenchin, result);
   TripleTriplet::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
+  ThreeQuads::TryMatch(expose_melds_in_id, result);
   AllTriplet::TryMatch(hand_melds_in_id, expose_melds_in_id, result);
   ThreeConcealedTriplets::TryMatch(
       hand_melds_in_id, expose_melds_in_id, result);
@@ -193,6 +197,9 @@ namespace yakus_matcher {
                   pTile new_tile,
                   std::vector<MeldInId>& hand_melds_in_id,
                   std::vector<MeldInId>& expose_melds_in_id) {
+    if (!new_tile) {
+      return;
+    }
     // make melds
     std::unordered_map<TileId, size_t> table;
     for (auto&& tile : hand.GetHands()) {
@@ -247,26 +254,23 @@ namespace yakus_matcher {
       }
 
       if (iter->second >= 1) {
-        auto&& iter_plus1 = table.find(static_cast<TileId>(iter->first + 1));
-        auto&& iter_plus2 = table.find(static_cast<TileId>(iter->first + 2));
-        if (iter_plus1 == table.end() || iter_plus1->second == 0
-            || iter_plus2 == table.end() || iter_plus2->second == 0) {
+        auto plus1 = static_cast<TileId>(iter->first + 1);
+        auto plus2 = static_cast<TileId>(iter->first + 2);
+        if (table.count(plus1) == 0 || table[plus1] == 0
+            || table.count(plus2) == 0 || table[plus2] == 0) {
           continue;
         }
         iter->second--;
-        iter_plus1->second--;
-        iter_plus2->second--;
-        melds.emplace_back(MeldType::Sequence,
-                           iter->first,
-                           iter_plus1->first,
-                           iter_plus2->first);
+        table[plus1]--;
+        table[plus2]--;
+        melds.emplace_back(MeldType::Sequence, iter->first, plus1, plus2);
         if (FindMeld(table, melds)) {
           return true;
         }
         melds.pop_back();
         iter->second++;
-        iter_plus1->second++;
-        iter_plus2->second++;
+        table[plus1]++;
+        table[plus2]++;
       }
     }
 

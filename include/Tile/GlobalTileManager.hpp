@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Common.hpp"
-#include "Tiles.hpp"
 
 #include <cstdint>
 #include <memory>
 #include <vector>
 
 namespace mahjong {
+using pTile = class Tile*;
+
 class GlobalTileManager {
  public:
   GlobalTileManager();
@@ -15,9 +16,12 @@ class GlobalTileManager {
   void Initial();
   pTile Pop();
   pTile PopBack();
-  
+
   void ShowDeck() const;
   void ShowDoraIndicator() const;
+  void ShowRemain() const;
+  void ShowDora() const;
+  void ShowInnerDora(bool in_riichi) const;
 
   bool Empty() const {
     return head_ > TILE_UPPER_BOUND;

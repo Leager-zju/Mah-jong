@@ -9,6 +9,7 @@
 #include <vector>
 
 namespace mahjong {
+
 enum class MeldType : uint16_t {
   Eyes,           // 雀头
   Triplet,        // 刻子

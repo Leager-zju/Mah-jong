@@ -7,9 +7,7 @@ void Expose::Show() const {
   for (auto&& meld : in_expose_) {
     meld.Show();
   }
-  if (in_expose_.empty()) {
-    std::cout << '\n';
-  }
+  std::cout << '\n';
 }
 
 void Expose::AddNewMeld(const Meld& meld) {

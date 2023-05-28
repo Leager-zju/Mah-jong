@@ -2,7 +2,6 @@
 
 #include "Expose.hpp"
 #include "Hand.hpp"
-#include "Tiles.hpp"
 
 #include <cstdint>
 #include <iostream>
@@ -10,7 +9,8 @@
 #include <vector>
 
 namespace mahjong {
-struct MatchResult;
+struct WinningResult;
+using pTile = class Tile*;
 
 class PlayerTileManager {
  public:
@@ -19,15 +19,19 @@ class PlayerTileManager {
         expose_(std::make_unique<Expose>()),
         player_index_(player_index),
         is_my_player_(is_my_player) {}
+  void Initial();
   void Draw(pTile new_tile);
   void ReceiveDiscardTile(pTile discard_tile);
-  
-  MatchResult TryWin(pTile new_tile, bool self_drawn);
+
+  WinningResult TryWin(pTile new_tile, bool self_drawn);
+  pTile TryRiichi();
+  bool InRiichi() const {
+    return in_riichi_;
+  }
 
   bool TryChi(pTile new_tile);
   bool TryPong(pTile new_tile, uint16_t discard_player_index);
   bool TryKong(pTile new_tile, uint16_t discard_player_index);
-  
 
   pTile Discard() const;
 

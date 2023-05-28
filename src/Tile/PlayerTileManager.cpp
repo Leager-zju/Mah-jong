@@ -2,8 +2,11 @@
 
 #include "Common.hpp"
 #include "DoraYaku.hpp"
+#include "Global.hpp"
 #include "GlobalTileManager.hpp"
+#include "Hand.hpp"
 #include "Meld.hpp"
+#include "RiichiDetector.hpp"
 #include "Tiles.hpp"
 #include "YakusMatcher.hpp"
 
@@ -13,11 +16,21 @@
 #include <cstdio>
 #include <iostream>
 #include <optional>
-#include <unordered_set>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mahjong {
+void PlayerTileManager::Initial() {
+  hand_->Initial();
+  expose_->Initial();
+  discards_.clear();
+  in_riichi_ = false;
+}
 void PlayerTileManager::Draw(pTile new_tile) {
+  if (!new_tile) {
+    return;
+  }
   new_tile->SetOwner(player_index_);
   if (is_my_player_) {
     std::cout << "\nYou Draw Tile: " << new_tile->ToString() << '\n';
@@ -31,89 +44,125 @@ void PlayerTileManager::ReceiveDiscardTile(pTile discard_tile) {
 
 pTile PlayerTileManager::Discard() const {
   pTile discard_tile = nullptr;
-  if (is_my_player_) {
-    std::string discard_string;
-    char input = '0';
-    std::cout << "Input the tile you want to discard: ";
-    while ((input = static_cast<char>(getchar())) != '\n') {
-      discard_string.push_back(input);
-    }
-    while (!hand_->Discard(discard_string, discard_tile)) {
-      std::cout << "Wrong Input, please try again: ";
-      while ((input = static_cast<char>(getchar())) != '\n') {
-        discard_string.push_back(input);
-      }
-    }
+  if (is_my_player_ && !in_riichi_) {
+    std::string header = "Input the tile you want to discard [default: "
+                         + hand_->GetLastDraw()->ToString() + "]";
+    global::GetInput(header.c_str(),
+                     [&discard_tile, this](const std::string& input) -> bool {
+                       return hand_->Discard(input, discard_tile);
+                     });
+
   } else {
-    discard_tile = hand_->RandomDiscard();
+    // discard_tile = hand_->RandomDiscard();
+    discard_tile = hand_->DiscardLastDraw();
   }
   return discard_tile;
 }
 
-MatchResult PlayerTileManager::TryWin(pTile new_tile, bool self_drawn) {
-  MatchResult res = mahjong::yakus_matcher::TryAllYakuMatch(
+WinningResult PlayerTileManager::TryWin(pTile new_tile, bool self_drawn) {
+  if (!new_tile) {
+    return {};
+  }
+  WinningResult res = mahjong::yakus_matcher::TryAllYakuMatch(
       *hand_, *expose_, new_tile, in_riichi_, self_drawn);
-  if (res.HasResult()) {
-    if (is_my_player_) {
-      char option = 'n';
-      std::cout << "\nYou Can Win, Do you? [y/n] ";
-      option = static_cast<char>(getchar());
-      while (option != 'y' && option != 'n') {
-        std::cout << "Wrong Input, Please Try Again. [y/n] ";
-        option = static_cast<char>(getchar());
-      }
-      if (option == 'y') {
-        Dora::TryMatch(*hand_, *expose_, in_riichi_, res);
-      }
+  if (res.HasResult() && is_my_player_) {
+    if (char option = global::GetInput("You Can Win. [y/n]",
+                                       [](const std::string& input) -> bool {
+                                         return input[0] == 'y'
+                                                || input[0] == 'n';
+                                       })[0];
+        option == 'y') {
+      Dora::TryMatch(*hand_, *expose_, in_riichi_, res);
     }
   }
   return res;
 }
 
+pTile PlayerTileManager::TryRiichi() {
+  pTile discard_tile = nullptr;
+  if (in_riichi_) {
+    return discard_tile;
+  }
+  auto waiting_results = riichi_detector::CheckRiichi(*hand_, *expose_);
+  if (waiting_results.empty()) {
+    return discard_tile;
+  }
+
+  std::string header
+      = "You can riichi. Tiles you can discard are show below, please make a "
+        "choice.\n0. Cancel\n";
+  for (size_t i = 0; i < waiting_results.size(); i++) {
+    std::string choice = std::to_string(i + 1) + ". ";
+    choice += Tile::TransformId2string(waiting_results[i].GetDiscard());
+    choice += "  WaitFor: ";
+    for (auto&& tile_id : waiting_results[i].GetWaitingFor()) {
+      choice.push_back(' ');
+      choice += Tile::TransformId2string(tile_id);
+    }
+    choice.push_back('\n');
+    header += choice;
+  }
+  std::string option = global::GetInput(
+      header.c_str(), [&waiting_results](const std::string& input) -> bool {
+        if (input.empty()) {
+          return false;
+        }
+        int index = std::stoi(input);
+        return index >= 0 && index <= waiting_results.size();
+      });
+
+  int index = std::stoi(option);
+  if (index == 0) {
+    return discard_tile;
+  }
+
+  TileId discard_tile_id = waiting_results[index - 1].GetDiscard();
+  hand_->Discard(Tile::TransformId2string(discard_tile_id), discard_tile);
+  in_riichi_ = true;
+  return discard_tile;
+}
+
 bool PlayerTileManager::TryChi(pTile new_tile) {
+  if (!new_tile || in_riichi_) {
+    return false;
+  }
   if (Tile::IsHonor(new_tile->GetId())) {
     return false;
   }
 
-  std::vector<Meld> possible_melds;
-  std::unordered_map<TileId, std::list<pTile>::iterator> table{};
-
-  auto hands = hand_->GetHands();
-  auto iter1 = hands.end();
-  auto iter2 = hands.end();
-
-  for (auto iter = hands.begin(); iter != hands.end(); iter++) {
-    TileId id = (*iter)->GetId();
-    if (!table.count(id)) {
-      table.insert({id, iter});
-    }
-  }
   TileId new_tile_id = new_tile->GetId();
-  uint16_t rank      = new_tile_id % 10;
+  auto&& in_hand       = hand_->GetHands();
+  std::vector<std::vector<Tile_Iter>> iters;
+  std::vector<Meld> possible_melds;
+
+  uint16_t rank = new_tile_id % 10;
   if (rank <= 7) {
     auto plus1 = static_cast<TileId>(new_tile_id + 1);
     auto plus2 = static_cast<TileId>(new_tile_id + 2);
-    if (table.count(plus1) && table.count(plus2)) {
-      iter1 = table[plus1];
-      iter2 = table[plus2];
+    auto iter1 = hand_->FindTile(plus1);
+    auto iter2 = hand_->FindTile(plus2);
+    if (iter1 != in_hand.end() && iter2 != in_hand.end()) {
+      iters.push_back({iter1, iter2});
       possible_melds.emplace_back(MeldType::Sequence, new_tile, *iter1, *iter2);
     }
   }
   if (rank >= 2 && rank <= 8) {
     auto minus1 = static_cast<TileId>(new_tile_id - 1);
     auto plus1  = static_cast<TileId>(new_tile_id + 1);
-    if (table.count(minus1) && table.count(plus1)) {
-      iter1 = table[minus1];
-      iter2 = table[plus1];
+    auto iter1  = hand_->FindTile(minus1);
+    auto iter2  = hand_->FindTile(plus1);
+    if (iter1 != in_hand.end() && iter2 != in_hand.end()) {
+      iters.push_back({iter1, iter2});
       possible_melds.emplace_back(MeldType::Sequence, *iter1, new_tile, *iter2);
     }
   }
   if (rank >= 3) {
     auto minus2 = static_cast<TileId>(new_tile_id - 2);
     auto minus1 = static_cast<TileId>(new_tile_id - 1);
-    if (table.count(minus1) && table.count(minus2)) {
-      iter1 = table[minus2];
-      iter2 = table[minus1];
+    auto iter1  = hand_->FindTile(minus2);
+    auto iter2  = hand_->FindTile(minus1);
+    if (iter1 != in_hand.end() && iter2 != in_hand.end()) {
+      iters.push_back({iter1, iter2});
       possible_melds.emplace_back(MeldType::Sequence, *iter1, *iter2, new_tile);
     }
   }
@@ -121,160 +170,131 @@ bool PlayerTileManager::TryChi(pTile new_tile) {
     return false;
   }
 
-  size_t select_index = -1;
   std::cout << "You Can Do \"Chi\" Operation:\n";
-  std::cout << "1. " << possible_melds[0].ToString() << '\n';
-  if (possible_melds.size() >= 2) {
-    std::cout << "2. " << possible_melds[1].ToString() << '\n';
-  }
-  if (possible_melds.size() >= 3) {
-    std::cout << "3. " << possible_melds[2].ToString() << '\n';
-  }
-  std::cout << "Choose A Meld You Want To Chi, [0] for cancel. ";
-  select_index = static_cast<char>(getchar()) - '0';
-  while (select_index > possible_melds.size()) {
-    std::cout << "Wrong Input, Please Try Again. ";
-    select_index = static_cast<char>(getchar()) - '0';
+  std::cout << "0. Cancel\n";
+  for (auto i = 0; i < possible_melds.size(); i++) {
+    std::cout << std::to_string(i + 1) << ". " << possible_melds[i].ToString()
+              << '\n';
   }
 
+  char input
+      = global::GetInput("Choose A Meld You Want To Chi.",
+                         [&possible_melds](const std::string& input) -> bool {
+                           uint16_t index = input[0] - '0';
+                           return index <= possible_melds.size();
+                         })[0];
+  uint16_t select_index = input - '0';
   if (select_index == 0) {
     return false;
   }
 
+  hand_->RemoveTiles(iters[select_index - 1]);
   expose_->AddNewMeld(possible_melds[select_index - 1]);
-  hand_->RemoveTile(iter1);
-  hand_->RemoveTile(iter2);
   return true;
 }
 
 bool PlayerTileManager::TryPong(pTile new_tile, uint16_t discard_player_index) {
-  TileId new_tile_id = new_tile->GetId();
-
-  auto hands = hand_->GetHands();
-  auto iter1 = hands.end();
-  auto iter2 = hands.end();
-
-  for (auto iter = hands.begin(); iter != hands.end(); iter++) {
-    TileId id = (*iter)->GetId();
-    if (id == new_tile_id) {
-      if (iter1 == hands.end()) {
-        iter1 = iter;
-      } else if (iter2 == hands.end()) {
-        iter2 = iter;
-      } else {
-        break;
-      }
-    }
-  }
-  if (iter2 == hands.end()) {
+  if (!new_tile || in_riichi_) {
     return false;
   }
 
-  char option = 'n';
-  std::cout << "You Can Do \"Pong\" Operation. [y/n] ";
-  option = static_cast<char>(getchar());
-  while (option != 'y' && option != 'n') {
-    std::cout << "Wrong Input, Please Try Again. [y/n] ";
-    option = static_cast<char>(getchar());
+  TileId new_tile_id = new_tile->GetId();
+  auto&& tile_iters  = hand_->FindTile(new_tile_id, 2);
+
+  if (tile_iters.size() < 2) {
+    return false;
   }
-  if (option == 'n') {
+
+  if (global::GetInput("You Can Do \"Pong\" Operation. [y/n]",
+                       [](const std::string& input) -> bool {
+                         return input[0] == 'y' || input[0] == 'n';
+                       })[0]
+      == 'n') {
     return false;
   }
 
   uint16_t diff = (discard_player_index - player_index_ + 4) % 4;
   switch (diff) {
     case 1:
-      expose_->AddNewMeld(Meld(MeldType::Triplet, *iter1, *iter2, new_tile));
+      expose_->AddNewMeld(
+          Meld(MeldType::Triplet, *tile_iters[0], *tile_iters[1], new_tile));
       break;
     case 2:
-      expose_->AddNewMeld(Meld(MeldType::Triplet, *iter1, new_tile, *iter2));
+      expose_->AddNewMeld(
+          Meld(MeldType::Triplet, *tile_iters[0], new_tile, *tile_iters[1]));
       break;
     case 3:
-      expose_->AddNewMeld(Meld(MeldType::Triplet, new_tile, *iter1, *iter2));
+      expose_->AddNewMeld(
+          Meld(MeldType::Triplet, new_tile, *tile_iters[0], *tile_iters[1]));
       break;
     default:
       return false;
   }
-
-  hand_->RemoveTile(iter1);
-  hand_->RemoveTile(iter2);
+  hand_->RemoveTiles(tile_iters);
   return true;
 }
 
 bool PlayerTileManager::TryKong(pTile new_tile, uint16_t discard_player_index) {
+  bool concealed_kong = discard_player_index == player_index_;
+  if (!new_tile || (in_riichi_ && !concealed_kong)) {
+    return false;
+  }
   if (GlobalTileManager::GetTileManager()->DeadEmpty()) {
     return false;
   }
 
   TileId new_tile_id = new_tile->GetId();
+  auto num           = concealed_kong ? 4 : 3;
+  auto&& tile_iters  = hand_->FindTile(new_tile_id, num);
 
-  auto hands = hand_->GetHands();
-  auto iter1 = hands.end();
-  auto iter2 = hands.end();
-  auto iter3 = hands.end();
-  auto iter4 = hands.end();  // for concealed kong
-
-  for (auto iter = hands.begin(); iter != hands.end(); iter++) {
-    TileId id = (*iter)->GetId();
-    if (id == new_tile_id) {
-      if (iter1 == hands.end()) {
-        iter1 = iter;
-      } else if (iter2 == hands.end()) {
-        iter2 = iter;
-      } else if (iter3 == hands.end()) {
-        iter3 = iter;
-      } else {
-        if (discard_player_index == player_index_ && iter4 == hands.end()) {
-          iter4 = iter;
-        }
-        break;
-      }
-    }
-  }
-  if (iter3 == hands.end()
-      || (discard_player_index == player_index_ && iter4 == hands.end())) {
+  if (tile_iters.size() < num) {
     return false;
   }
 
-  char option = 'n';
-  std::cout << "You Can Do \"Kong\" Operation. [y/n] ";
-  option = static_cast<char>(getchar());
-  while (option != 'y' && option != 'n') {
-    std::cout << "Wrong Input, Please Try Again. [y/n] ";
-    option = static_cast<char>(getchar());
-  }
-  if (option == 'n') {
+  if (char option = global::GetInput("You Can Do \"Kong\" Operation. [y/n]",
+                                     [](const std::string& input) -> bool {
+                                       return input[0] == 'y'
+                                              || input[0] == 'n';
+                                     })[0];
+      option == 'n') {
     return false;
   }
 
   uint16_t diff = (discard_player_index - player_index_ + 4) % 4;
   switch (diff) {
     case 0:
-      expose_->AddNewMeld(
-          Meld(MeldType::ConcealedKong, *iter1, *iter2, *iter3, *iter4));
+      expose_->AddNewMeld(Meld(MeldType::ConcealedKong,
+                               *tile_iters[0],
+                               *tile_iters[1],
+                               *tile_iters[2],
+                               *tile_iters[3]));
       break;
     case 1:
-      expose_->AddNewMeld(
-          Meld(MeldType::ExposeKong, *iter1, *iter2, *iter3, new_tile));
+      expose_->AddNewMeld(Meld(MeldType::ExposeKong,
+                               *tile_iters[0],
+                               *tile_iters[1],
+                               *tile_iters[2],
+                               new_tile));
       break;
     case 2:
-      expose_->AddNewMeld(
-          Meld(MeldType::ExposeKong, *iter1, new_tile, *iter2, *iter3));
+      expose_->AddNewMeld(Meld(MeldType::ExposeKong,
+                               *tile_iters[0],
+                               new_tile,
+                               *tile_iters[1],
+                               *tile_iters[2]));
       break;
     case 3:
-      expose_->AddNewMeld(
-          Meld(MeldType::ExposeKong, new_tile, *iter1, *iter2, *iter3));
+      expose_->AddNewMeld(Meld(MeldType::ExposeKong,
+                               new_tile,
+                               *tile_iters[0],
+                               *tile_iters[1],
+                               *tile_iters[2]));
       break;
     default:
       return false;
   }
 
-  hand_->RemoveTile(iter1);
-  hand_->RemoveTile(iter2);
-  hand_->RemoveTile(iter3);
-  if (iter4 != hands.end()) {
-    hand_->RemoveTile(iter4);
-  }
+  hand_->RemoveTiles(tile_iters);
   return true;
 }
 

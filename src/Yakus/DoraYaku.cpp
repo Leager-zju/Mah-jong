@@ -10,7 +10,7 @@ namespace mahjong {
 void Dora::TryMatch(const Hand& hand,
                     const Expose& expose,
                     bool Riichi,
-                    MatchResult& result) {
+                    WinningResult& result) {
   const std::unique_ptr<GlobalTileManager>& tile_manager
       = GlobalTileManager::GetTileManager();
   for (auto&& tile : hand.GetHands()) {

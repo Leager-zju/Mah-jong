@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <set>
 #include <string>
 
 namespace mahjong {
@@ -30,6 +31,8 @@ class Tile {
     return id == Z || id == B || id == F;
   }
   static TileId Next(TileId id);
+  static uint16_t Difference(TileId lhs, TileId rhs);
+  static std::set<TileId> FindMeldComplement(TileId lhs, TileId rhs);
 
   void Initial();
   std::string GetAnsi() const;

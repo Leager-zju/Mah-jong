@@ -13,7 +13,7 @@ namespace mahjong {
 void OutsideHand::TryMatch(const std::vector<MeldInId>& hand,
                            const std::vector<MeldInId>& expose,
                            bool Menzenchin,
-                           MatchResult& result) {
+                           WinningResult& result) {
   bool half = false;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -62,7 +62,7 @@ void OutsideHand::TryMatch(const std::vector<MeldInId>& hand,
 void PureStraight::TryMatch(const std::vector<MeldInId>& hand,
                             const std::vector<MeldInId>& expose,
                             bool Menzenchin,
-                            MatchResult& result) {
+                            WinningResult& result) {
   std::vector<TileId> temp;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -101,7 +101,7 @@ void PureStraight::TryMatch(const std::vector<MeldInId>& hand,
 void MixedTripleSequence::TryMatch(const std::vector<MeldInId>& hand,
                                    const std::vector<MeldInId>& expose,
                                    bool Menzenchin,
-                                   MatchResult& result) {
+                                   WinningResult& result) {
   std::vector<TileId> temp;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -143,7 +143,7 @@ void MixedTripleSequence::TryMatch(const std::vector<MeldInId>& hand,
 
 void TripleTriplet::TryMatch(const std::vector<MeldInId>& hand,
                              const std::vector<MeldInId>& expose,
-                             MatchResult& result) {
+                             WinningResult& result) {
   std::unordered_map<TileId, uint8_t> triplet_count;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -180,7 +180,7 @@ void TripleTriplet::TryMatch(const std::vector<MeldInId>& hand,
 }
 
 void ThreeQuads::TryMatch(const std::vector<MeldInId>& expose,
-                          MatchResult& result) {
+                          WinningResult& result) {
   uint16_t count = 0;
   for (auto&& meld : expose) {
     if (meld.GetMeldType() == MeldType::ConcealedKong
@@ -196,7 +196,7 @@ void ThreeQuads::TryMatch(const std::vector<MeldInId>& expose,
 
 void AllTriplet::TryMatch(const std::vector<MeldInId>& hand,
                           const std::vector<MeldInId>& expose,
-                          MatchResult& result) {
+                          WinningResult& result) {
   for (auto&& meld : hand) {
     if (meld.GetMeldType() == MeldType::Sequence) {
       return;
@@ -213,7 +213,7 @@ void AllTriplet::TryMatch(const std::vector<MeldInId>& hand,
 
 void ThreeConcealedTriplets::TryMatch(const std::vector<MeldInId>& hand,
                                       const std::vector<MeldInId>& expose,
-                                      MatchResult& result) {
+                                      WinningResult& result) {
   uint8_t count = 0;
   for (auto&& meld : hand) {
     if (meld.GetMeldType() == MeldType::Triplet) {
@@ -233,7 +233,7 @@ void ThreeConcealedTriplets::TryMatch(const std::vector<MeldInId>& hand,
 
 void AllTerminalsAndHonors::TryMatch(const std::vector<MeldInId>& hand,
                                      const std::vector<MeldInId>& expose,
-                                     MatchResult& result) {
+                                     WinningResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
     if (meld.GetMeldType() == MeldType::Sequence
@@ -254,7 +254,7 @@ void AllTerminalsAndHonors::TryMatch(const std::vector<MeldInId>& hand,
 
 void SevenPairs::TryMatch(const Hand& hand,
                           TileId new_tile_id,
-                          MatchResult& result) {
+                          WinningResult& result) {
   std::unordered_map<TileId, uint8_t> counts;
   for (auto&& tile : hand.GetHands()) {
     TileId id = tile->GetId();

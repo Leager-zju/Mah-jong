@@ -13,6 +13,7 @@ class Expose {
  public:
   Expose() = default;
   explicit Expose(std::vector<Meld>& in_expose) : in_expose_(in_expose) {}
+  void Initial() {in_expose_.clear();}
   void AddNewMeld(const Meld& meld);
   void Show() const;
   const std::vector<Meld>& GetExposes() const {

@@ -1,6 +1,7 @@
 #include "Global.hpp"
 
 #include <cstdint>
+#include <iostream>
 
 namespace mahjong {
 namespace global {
@@ -63,8 +64,28 @@ namespace global {
         return "";
     }
   }
+
   const char* ColorOff() {
     return color_off;
+  }
+
+  std::string GetInput(
+      const char* header,
+      const std::function<bool(const std::string&)>& check_input) {
+    std::cout << header << ' ';
+    char instream = '\0';
+    std::string input;
+    while ((instream = static_cast<char>(getchar())) != '\n') {
+      input.push_back(instream);
+    }
+    while (!check_input(input)) {
+      std::cout << "Wrong Input, Please Try Again! ";
+      input.clear();
+      while ((instream = static_cast<char>(getchar())) != '\n') {
+        input.push_back(instream);
+      }
+    }
+    return input;
   }
 };  // namespace global
 };  // namespace mahjong

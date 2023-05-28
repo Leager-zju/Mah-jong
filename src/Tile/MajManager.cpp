@@ -30,9 +30,9 @@ MajManager::MajManager() {
   cur_index_       = banker_index_;
   my_player_index_ = dist(mt);
 
-  player_.reserve(TOTAL_PLAYERS);
+  players_.reserve(TOTAL_PLAYERS);
   for (uint16_t i = 0; i < TOTAL_PLAYERS; i++) {
-    player_.emplace_back(
+    players_.emplace_back(
         std::make_unique<PlayerTileManager>(i, i == my_player_index_));
   }
 }
@@ -42,8 +42,12 @@ const std::unique_ptr<MajManager>& MajManager::GetMajManager() {
 }
 
 void MajManager::Initial() {
+  std::cout << "initial\n";
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
   global_tile_manager->Initial();
+  for (auto&& player : players_) {
+    player->Initial();
+  }
   banker_index_ = NextIndexOf(banker_index_);
   cur_index_    = banker_index_;
   for (size_t round = 0; round < 3; round++) {
@@ -75,14 +79,15 @@ void MajManager::BeginNewRound() {
   bool kong_before_draw = false;
   bool self_drawn_win   = false;
 
-  MatchResult res;
+  WinningResult res;
 
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
   while (!global_tile_manager->Empty()) {
-    pTile new_tile = need_draw
-                         ? (kong_before_draw ? global_tile_manager->PopBack()
-                                             : global_tile_manager->Pop())
-                         : nullptr;
+    pTile new_tile     = need_draw
+                             ? (kong_before_draw ? global_tile_manager->PopBack()
+                                                 : global_tile_manager->Pop())
+                             : nullptr;
+    pTile discard_tile = nullptr;
 
     need_draw        = true;
     kong_before_draw = false;
@@ -93,92 +98,112 @@ void MajManager::BeginNewRound() {
       winner_index   = my_player_index_;
       break;
     }
-    if (player_[cur_index_]->TryKong(new_tile, cur_index_)) {
+    PlayerTryRiichi(cur_index_, discard_tile);
+    if (discard_tile) {
+      std::cout << "Player" << cur_index_ << " Discard "
+                << discard_tile->ToString() << "And Riichi!\n";
+    } else if (cur_index_ == my_player_index_
+               && players_[cur_index_]->TryKong(new_tile, cur_index_)) {
       kong_before_draw = true;
       // RoundChange(cur_index_);
       continue;
+    } else {
+      PlayerDiscard(cur_index_, discard_tile);
+      std::cout << "Player" << cur_index_ << " Discard "
+                << discard_tile->ToString() << '\n';
     }
 
-    pTile discard_tile = PlayerDiscard(cur_index_);
-    std::cout << "Player" << cur_index_ << " Discard "
-              << discard_tile->ToString() << '\n';
-
-    if (cur_index_
-        != my_player_index_) {  // TODO(leager): check every player but not myplayer
-      res = player_[my_player_index_]->TryWin(discard_tile, false);
+    if (cur_index_ != my_player_index_) {
+      // TODO(leager): check every player but not myplayer
+      res = players_[my_player_index_]->TryWin(discard_tile, false);
       if (res.HasResult()) {
         self_drawn_win = false;
         winner_index   = my_player_index_;
         break;
       }
 
-      if (player_[my_player_index_]->TryKong(discard_tile, cur_index_)) {
+      if (players_[my_player_index_]->TryKong(discard_tile, cur_index_)) {
         kong_before_draw = true;
         RoundChange(my_player_index_);
+        ClearAndPrintHeader();
         continue;
       }
 
-      if (player_[my_player_index_]->TryPong(discard_tile, cur_index_)) {
+      if (players_[my_player_index_]->TryPong(discard_tile, cur_index_)) {
         need_draw = false;
         RoundChange(my_player_index_);
+        ClearAndPrintHeader();
         continue;
       }
 
       if (IsPrevIndexOf(cur_index_, my_player_index_)) {
-        if (player_[my_player_index_]->TryChi(discard_tile)) {
+        if (players_[my_player_index_]->TryChi(discard_tile)) {
           need_draw = false;
           RoundChange(my_player_index_);
+          ClearAndPrintHeader();
           continue;
         }
       }
     }
 
     PlayerImplementDiscard(cur_index_, discard_tile);
-
-    ClearAndPrintHeader();
     RoundChange(NextIndexOf(cur_index_));
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    ClearAndPrintHeader();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
-  if (winner_index <= 3) {
+  if (IsValidPlayerIndex(winner_index)) {
+    ClearAndPrintTitle();
     std::cout << "Player" << winner_index
               << (self_drawn_win ? " SELF DRAWN!\n" : " RONHO~\n");
+
+    std::cout << "DORA: ";
+    global_tile_manager->ShowDora();
+    std::cout << "\tINNER DORA: ";
+    global_tile_manager->ShowInnerDora(players_[winner_index]->InRiichi());
+    std::cout << '\n';
+
     res.ShowResult();
-    std::cout << "\n\nPRESS ANY KEY TO CONTINUE...";
-    getchar();
-    getchar();
+  } else {
+    std::cout << "荒牌流局...";
   }
+
+  std::cout << "\n\nPRESS ANY KEY TO CONTINUE...";
+  getchar();
 }
 
 void MajManager::PlayerDraw(uint16_t index, pTile new_tile) {
   if (new_tile) {
-    player_[index]->Draw(new_tile);
+    players_[index]->Draw(new_tile);
   }
 }
 
-MatchResult MajManager::PlayerDrawAndCheckSelfDrawn(uint16_t index,
-                                                    pTile new_tile) {
+WinningResult MajManager::PlayerDrawAndCheckSelfDrawn(uint16_t index,
+                                                      pTile new_tile) {
   if (new_tile) {
     PlayerDraw(index, new_tile);
-    return player_[index]->TryWin(new_tile, true);
+    return players_[index]->TryWin(new_tile, true);
   }
   return {};
 }
 
-pTile MajManager::PlayerDiscard(uint16_t index) {
-  return player_[index]->Discard();
+void MajManager::PlayerTryRiichi(uint16_t index, pTile& discard_tile) {
+  discard_tile = players_[index]->TryRiichi();
+}
+
+void MajManager::PlayerDiscard(uint16_t index, pTile& discard_tile) {
+  discard_tile = players_[index]->Discard();
 }
 
 void MajManager::PlayerImplementDiscard(uint16_t index, pTile discard_tile) {
   if (discard_tile) {
-    player_[index]->ReceiveDiscardTile(discard_tile);
+    players_[index]->ReceiveDiscardTile(discard_tile);
   }
 }
 
-void MajManager::ClearAndPrintHeader() const {
+void MajManager::ClearAndPrintTitle() {
   system("cls");
   constexpr auto title = R"(
-
 
             ___           ___           ___            ___         ___           ___           ___     
            /\__\         /\  \         /\__\          /\  \       /\  \         /\__\         /\  \    
@@ -192,27 +217,31 @@ void MajManager::ClearAndPrintHeader() const {
            /:/  /        /:/  /        /:/  /                    \::/  /        /:/  /       \::/  /   
            \/__/         \/__/         \/__/                      \/__/         \/__/         \/__/    
 
-
 )";
-
   std::cout << title;
+}
 
+void MajManager::ClearAndPrintHeader() const {
+  ClearAndPrintTitle();
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
   global_tile_manager->ShowDoraIndicator();
   for (size_t i = 0; i < 4; i++) {
     std::cout << global::GetColor(i) << "Player " << i << " "
               << "(" << global::GetWind(i, banker_index_) << ")"
-              << "(" << global::GetRelativePosition(i, my_player_index_) << ")"
-              << global::ColorOff() << '\t';
+              << "(" << global::GetRelativePosition(i, my_player_index_) << ")";
+    if (players_[i]->InRiichi()) {
+      std::cout << "[立直]";
+    }
+    std::cout << global::ColorOff() << '\t';
 
-    player_[i]->ShowDiscard();
+    players_[i]->ShowDiscard();
 
     std::cout << " [Expose] ";
-    player_[i]->ShowExpose();
+    players_[i]->ShowExpose();
     std::cout << '\n';
   }
 
   std::cout << "Your Hands: ";
-  player_[my_player_index_]->ShowHand();
+  players_[my_player_index_]->ShowHand();
 }
 };  // namespace mahjong

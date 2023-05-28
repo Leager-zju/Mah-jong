@@ -9,19 +9,19 @@
 #include <unordered_set>
 
 namespace mahjong {
-void Tsumo::TryMatch(bool self_drawn, MatchResult& result) {
+void Tsumo::TryMatch(bool self_drawn, WinningResult& result) {
   if (self_drawn) {
     result.AddPoint(1);
     result.AddYaku(YakuType::Tsumo);
   }
 }
 
-void Riichi::TryMatch(MatchResult& result) {
+void Riichi::TryMatch(WinningResult& result) {
   result.AddPoint(1);
   result.AddYaku(YakuType::Riichi);
 }
 
-void UnderTheSeaOrRiver::TryMatch(bool self_drawn, MatchResult& result) {
+void UnderTheSeaOrRiver::TryMatch(bool self_drawn, WinningResult& result) {
   auto&& global_tile_manager = GlobalTileManager::GetTileManager();
   if (global_tile_manager->Empty()) {
     result.AddPoint(1);
@@ -32,7 +32,7 @@ void UnderTheSeaOrRiver::TryMatch(bool self_drawn, MatchResult& result) {
 
 void Wind::TryMatch(const std::vector<MeldInId>& hand,
                     const std::vector<MeldInId>& expose,
-                    MatchResult& result) {
+                    WinningResult& result) {
   auto&& maj_manager = MajManager::GetMajManager();
   // 大四喜->小四喜->自风/场风
   uint8_t east_triplet  = 0;
@@ -92,7 +92,7 @@ void Wind::TryMatch(const std::vector<MeldInId>& hand,
 
 void Dragon::TryMatch(const std::vector<MeldInId>& hand,
                       const std::vector<MeldInId>& expose,
-                      MatchResult& result) {
+                      WinningResult& result) {
   uint8_t red_triplet   = 0;
   uint8_t white_triplet = 0;
   uint8_t green_triplet = 0;
@@ -150,7 +150,7 @@ void Dragon::TryMatch(const std::vector<MeldInId>& hand,
 
 void AllSimple::TryMatch(const std::vector<MeldInId>& hand,
                          const std::vector<MeldInId>& expose,
-                         MatchResult& result) {
+                         WinningResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
     if (Tile::IsTerminal(tile_ids[0])
@@ -173,7 +173,7 @@ void AllSimple::TryMatch(const std::vector<MeldInId>& hand,
 }
 
 void PureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
-                                  MatchResult& result) {
+                                  WinningResult& result) {
   std::unordered_set<TileId> occured;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -190,7 +190,7 @@ void PureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
 
 void Pinfu::TryMatch(const std::vector<MeldInId>& hand,
                      TileId new_tile_id,
-                     MatchResult& result) {
+                     WinningResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
     if (meld.GetMeldType() == MeldType::Sequence) {
@@ -209,7 +209,7 @@ void Pinfu::TryMatch(const std::vector<MeldInId>& hand,
   }
 }
 
-void Ippatsu::TryMatch(MatchResult& result) {
+void Ippatsu::TryMatch(WinningResult& result) {
   // TODO(Leager)
 }
 };  // namespace mahjong

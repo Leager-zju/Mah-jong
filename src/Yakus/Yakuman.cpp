@@ -13,7 +13,7 @@
 namespace mahjong {
 void BigThreeDragons::TryMatch(const std::vector<MeldInId>& hand,
                                const std::vector<MeldInId>& expose,
-                               MatchResult& result) {
+                               WinningResult& result) {
   uint8_t count = 0;
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
@@ -38,7 +38,7 @@ void FourConcealedTriplets::TryMatch(const std::vector<MeldInId>& hand,
                                      const std::vector<MeldInId>& expose,
                                      TileId new_tile_id,
                                      bool self_drawn,
-                                     MatchResult& result) {
+                                     WinningResult& result) {
   uint8_t count    = 0;
   bool single_wait = false;
   for (auto&& meld : hand) {
@@ -70,7 +70,7 @@ void FourConcealedTriplets::TryMatch(const std::vector<MeldInId>& hand,
 
 void AllHonors::TryMatch(const std::vector<MeldInId>& hand,
                          const std::vector<MeldInId>& expose,
-                         MatchResult& result) {
+                         WinningResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
     if (!Tile::IsHonor(tile_ids[0])) {
@@ -90,7 +90,7 @@ void AllHonors::TryMatch(const std::vector<MeldInId>& hand,
 
 void AllGreen::TryMatch(const std::vector<MeldInId>& hand,
                         const std::vector<MeldInId>& expose,
-                        MatchResult& result) {
+                        WinningResult& result) {
   auto is_green = [](TileId id) -> bool {
     return id == _2s || id == _3s || id == _4s || id == _6s || id == _8s
            || id == F;
@@ -115,7 +115,7 @@ void AllGreen::TryMatch(const std::vector<MeldInId>& hand,
 
 void AllTerminals::TryMatch(const std::vector<MeldInId>& hand,
                             const std::vector<MeldInId>& expose,
-                            MatchResult& result) {
+                            WinningResult& result) {
   for (auto&& meld : hand) {
     auto&& tile_ids = meld.GetTileId();
     if (meld.GetMeldType() == MeldType::Sequence || Tile::IsHonor(tile_ids[0])
@@ -137,10 +137,12 @@ void AllTerminals::TryMatch(const std::vector<MeldInId>& hand,
 
 void ThirteenOrphans::TryMatch(const Hand& hand,
                                TileId new_tile_id,
-                               MatchResult& result) {
+                               WinningResult& result) {
   std::unordered_set<TileId> tile_set;
   for (auto&& tile : hand.GetHands()) {
-    tile_set.insert(tile->GetId());
+    if (TileId id = tile->GetId(); Tile::IsTerminal(id)) {
+      tile_set.insert(id);
+    }
   }
   if (tile_set.size() == 12 && tile_set.find(new_tile_id) == tile_set.end()) {
     result.AddYakuman(1);
@@ -153,7 +155,7 @@ void ThirteenOrphans::TryMatch(const Hand& hand,
 
 void FourWind::TryMatch(const std::vector<MeldInId>& hand,
                         const std::vector<MeldInId>& expose,
-                        MatchResult& result) {
+                        WinningResult& result) {
   uint8_t count = 0;
   bool wind_eye = false;
   for (auto&& meld : hand) {
@@ -181,7 +183,7 @@ void FourWind::TryMatch(const std::vector<MeldInId>& hand,
 }
 
 void FourQuads::TryMatch(const std::vector<MeldInId>& expose,
-                         MatchResult& result) {
+                         WinningResult& result) {
   uint8_t count = 0;
   for (auto&& meld : expose) {
     if (meld.GetMeldType() == MeldType::ConcealedKong
@@ -197,7 +199,7 @@ void FourQuads::TryMatch(const std::vector<MeldInId>& expose,
 
 void NineGates::TryMatch(const Hand& hand,
                          TileId new_tile_id,
-                         MatchResult& result) {
+                         WinningResult& result) {
   std::unordered_map<TileId, uint8_t> counts;
   uint8_t category = hand.GetHands().front()->GetId() / 10;
 

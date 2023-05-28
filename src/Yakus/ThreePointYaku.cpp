@@ -11,7 +11,7 @@ namespace mahjong {
 void Flush::TryMatch(const std::vector<MeldInId>& hand,
                      const std::vector<MeldInId>& expose,
                      bool Menzenchin,
-                     MatchResult& result) {
+                     WinningResult& result) {
   uint8_t category = UINT8_MAX;
   bool half        = false;
   for (auto&& meld : hand) {
@@ -54,7 +54,7 @@ void Flush::TryMatch(const std::vector<MeldInId>& hand,
 }
 
 void TwicePureDoubleSequence::TryMatch(const std::vector<MeldInId>& hand,
-                                       MatchResult& result) {
+                                       WinningResult& result) {
   std::unordered_map<TileId, uint8_t> counts;
   for (auto&& meld : hand) {
     if (meld.GetMeldType() == MeldType::Sequence) {
