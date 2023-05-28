@@ -4,6 +4,7 @@
 #include <memory>
 
 int main() {
+  system("chcp 65001");
   std::cout << "PRESS ANY KEY TO BEGIN...\n";
   getchar();
 
